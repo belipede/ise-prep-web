@@ -1,0 +1,572 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ISE Prep</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ISE Prep">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#f7f8fa" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#11151b" media="(prefers-color-scheme: dark)">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+/* One phone column: header, the current tab's cards, a fixed tab bar. Sheets slide up from the bottom. */
+:root {
+  --bg: #f7f8fa; --surface: #ffffff; --ink: #18202a; --muted: #5f6b78; --line: #e4e8ee;
+  --accent: #1f4e79; --accent-soft: #e6eef7; --accent-ink: #ffffff;
+  --good: #1d7a4f; --good-soft: #e3f4ea; --warn: #9a5a0c; --warn-soft: #fdf0dd;
+  --radius: 16px; --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #11151b; --surface: #1a2029; --ink: #e8edf3; --muted: #9aa6b4; --line: #2a323d;
+    --accent: #7fb2e5; --accent-soft: #1d2a3a; --accent-ink: #0d1420; --good: #6fd1a0; --good-soft: #17301f;
+    --warn: #f0b066; --warn-soft: #33261a; color-scheme: dark; }
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.4 var(--font); -webkit-text-size-adjust: 100%; }
+.wrap { max-width: 560px; margin: 0 auto; padding: calc(env(safe-area-inset-top, 0px) + 12px) 16px calc(env(safe-area-inset-bottom, 0px) + 96px); }
+header.top { padding: 8px 2px 12px; }
+.eyebrow { margin: 0; color: var(--muted); font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+h1 { margin: 2px 0 0; font-size: 28px; }
+h2 { margin: 0 0 8px; font-size: 17px; }
+h3 { margin: 14px 0 6px; font-size: 14px; color: var(--muted); font-weight: 600; }
+p { margin: 6px 0; }
+a { color: var(--accent); }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; margin: 0 0 12px; }
+.card.accent { background: var(--accent-soft); border-color: transparent; }
+.card.warn { background: var(--warn-soft); border-color: transparent; }
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+.row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-top: 1px solid var(--line); }
+.row:first-of-type { border-top: 0; }
+.row .grow { flex: 1; min-width: 0; }
+.row .title { overflow-wrap: anywhere; }
+.row.done .title { text-decoration: line-through; color: var(--muted); }
+.chk { width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--muted); background: none; flex: none; padding: 0; display: grid; place-items: center; color: var(--accent-ink); }
+.chk.on { background: var(--good); border-color: var(--good); }
+.chk.on::after { content: ""; width: 10px; height: 6px; border: solid currentColor; border-width: 0 0 2.5px 2.5px; transform: translateY(-1px) rotate(-45deg); }
+.tag { display: inline-block; font-size: 12px; padding: 1px 7px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); margin-left: 4px; }
+.tag.laptop { background: var(--warn-soft); color: var(--warn); }
+.btn { font: inherit; font-size: 15px; font-weight: 600; border: 0; border-radius: 12px; padding: 10px 14px; background: var(--accent); color: var(--accent-ink); }
+.btn.ghost { background: var(--accent-soft); color: var(--accent); }
+.btn.small { padding: 6px 10px; font-size: 13px; border-radius: 10px; }
+.btn.danger { background: #b3261e; color: #fff; }
+.btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.bar { height: 8px; background: var(--line); border-radius: 99px; overflow: hidden; margin: 8px 0 4px; }
+.bar > i { display: block; height: 100%; background: var(--good); }
+.status { font-size: 13px; font-weight: 600; }
+.status.ok { color: var(--good); } .status.late { color: var(--warn); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 10px; }
+.chip { font: inherit; font-size: 14px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 6px 12px; }
+.chip.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+label { display: block; font-size: 13px; font-weight: 600; color: var(--muted); margin: 10px 0 4px; }
+input, select, textarea { font: inherit; font-size: 16px; width: 100%; padding: 9px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); }
+textarea { min-height: 120px; font-family: ui-monospace, monospace; font-size: 12px; }
+.weeks { display: flex; align-items: flex-end; gap: 4px; height: 90px; margin: 10px 0 2px; }
+.weeks > div { flex: 1; background: var(--accent); border-radius: 4px 4px 0 0; min-height: 2px; }
+.weeks > div.zero { background: var(--line); }
+.weeklbl { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); }
+.stats { display: flex; gap: 10px; }
+.stats > div { flex: 1; }
+.stats b { display: block; font-size: 22px; }
+.saveerr { background: var(--warn-soft); border-radius: 12px; padding: 10px 12px; margin-bottom: 12px; }
+nav.tabs { z-index: 10; position: fixed; left: 0; right: 0; bottom: 0; background: var(--surface); border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom, 0px); }
+nav.tabs .in { max-width: 560px; margin: 0 auto; display: flex; }
+nav.tabs button { flex: 1; font: inherit; font-size: 12px; border: 0; background: none; color: var(--muted); padding: 10px 0 8px; }
+nav.tabs button.on { color: var(--accent); font-weight: 700; }
+#sheet .back { z-index: 20; position: fixed; inset: 0; background: rgba(0,0,0,.35); }
+#sheet .panel { z-index: 21; position: fixed; left: 0; right: 0; bottom: 0; max-height: 88vh; overflow: auto; background: var(--bg); border-radius: 20px 20px 0 0; padding: 18px 16px calc(env(safe-area-inset-bottom, 0px) + 18px); }
+#sheet .panel .in { max-width: 560px; margin: 0 auto; }
+.msg { color: var(--good); font-weight: 600; font-size: 14px; }
+.err { color: #b3261e; font-weight: 600; font-size: 14px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <p class="eyebrow" id="eyebrow"></p>
+    <h1 id="heading">ISE Prep</h1>
+  </header>
+  <div id="saveerr" class="saveerr" role="alert" hidden></div>
+  <main id="view"></main>
+</div>
+<div id="sheet"></div>
+<nav class="tabs" aria-label="Sections"><div class="in">
+  <button type="button" data-tab="today">This week</button>
+  <button type="button" data-tab="plan">Plan</button>
+  <button type="button" data-tab="log">Log</button>
+  <button type="button" data-tab="library">Library</button>
+  <button type="button" data-tab="more">More</button>
+</div></nav>
+
+<script>
+(() => {
+  // ---------- Calendar days: local day keys (YYYY-MM-DD), never seconds / 86400 ----------
+  const pad = n => String(n).padStart(2, "0");
+  const dk = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  const parse = k => { const [y, m, d] = k.split("-").map(Number); return new Date(y, m - 1, d, 12); };
+  const addDays = (k, n) => { const d = parse(k); d.setDate(d.getDate() + n); return dk(d); };
+  const today = () => dk(new Date());
+  const weekStart = k => { const d = parse(k); return addDays(k, -((d.getDay() + 6) % 7)); };   // Monday
+  const daysBetween = (a, b) => Math.round((parse(b) - parse(a)) / 864e5);   // both at local noon, so DST can't shift it
+  const fmtDay = k => parse(k).toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" });
+  const fmtDate = k => parse(k).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+  const fmtMonth = k => parse(k).toLocaleDateString(undefined, { month: "short", year: "numeric" });
+  const keyOk = k => typeof k === "string" && /^\d{4}-\d{2}-\d{2}$/.test(k);
+  const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const hm = m => { m = Math.round(m); if (m < 60) return `${m} min`; const h = Math.floor(m / 60), r = m % 60; return r ? `${h} h ${r} min` : `${h} h`; };
+
+  // ---------- The plan: phases and starting tasks (from the NUS ISE prep doc, Nov 2026) ----------
+  const VERSION = "v1.0.0";
+  const PHASES = [
+    { id: 1, name: "Calculus first", start: "2026-12-01", end: "2027-07-31", goal: "Differentiate and integrate the common functions confidently, so MA1301 is review and MA1511 is manageable.", checkpoint: "80% on Khan Academy's Calculus 1 course challenge, and quick-check questions 1 to 3 right." },
+    { id: 2, name: "Stats and matrices", start: "2027-08-01", end: "2028-01-31", goal: "Put proper names to your stats intuition and get solid with systems of equations and matrices.", checkpoint: "Quick-check questions 4 to 6 right, and explain standard deviation in one sentence." },
+    { id: 3, name: "Your story and Solver", start: "2028-02-01", end: "2028-04-30", goal: "Turn the experience you already have into portfolio material before ORD.", checkpoint: "A True Digital Park case study draft and a first Solver model." },
+    { id: 4, name: "After ORD", start: "2028-05-01", end: "2028-07-31", goal: "Walk into Week 1 with Python back, math warmed up and a CV ready.", checkpoint: "CS50P to week 6, the PuLP project on GitHub, Lean Six Sigma Yellow Belt and a CV." },
+  ];
+  // [phase, title, sessions of 60 min, "phone" | "laptop"]
+  const SEED = [
+    [1, "Precalculus: functions and graphs", 2, "phone"],
+    [1, "Exponentials and logarithms", 2, "phone"],
+    [1, "Limits: the idea", 3, "phone"],
+    [1, "Derivatives: definition and power rule", 2, "phone"],
+    [1, "Product and quotient rules", 2, "phone"],
+    [1, "Chain rule", 3, "phone"],
+    [1, "Derivatives of e^x, ln x, sin and cos", 3, "phone"],
+    [1, "Maxima and minima (first taste of optimisation)", 4, "phone"],
+    [1, "Antiderivatives", 2, "phone"],
+    [1, "Definite integrals", 3, "phone"],
+    [1, "Integration by substitution", 2, "phone"],
+    [1, "Checkpoint: Calculus 1 course challenge and quick-check Q1 to Q3", 1, "phone"],
+    [2, "Mean, median and quartiles", 2, "phone"],
+    [2, "Standard deviation and box plots", 2, "phone"],
+    [2, "Counting and basic probability", 2, "phone"],
+    [2, "Combining events and conditional probability", 3, "phone"],
+    [2, "Normal distribution", 2, "phone"],
+    [2, "Binomial distribution", 2, "phone"],
+    [2, "Sampling: the idea", 1, "phone"],
+    [2, "Solving systems of equations", 2, "phone"],
+    [2, "Matrix multiplication", 2, "phone"],
+    [2, "Determinants", 1, "phone"],
+    [2, "Checkpoint: quick-check Q4 to Q6, explain standard deviation", 1, "phone"],
+    [3, "True Digital Park case study: outline", 1, "phone"],
+    [3, "True Digital Park case study: draft", 2, "laptop"],
+    [3, "Excel XLOOKUP", 1, "laptop"],
+    [3, "Excel Solver basics", 2, "laptop"],
+    [3, "Solver model: cheapest meal plan that hits your protein target", 2, "laptop"],
+    [3, "Read The Goal (Goldratt)", 1, "phone"],
+    [3, "Checkpoint: case study draft and Solver model done", 1, "laptop"],
+    [4, "CS50P week 0: functions and variables", 3, "laptop"],
+    [4, "CS50P week 1: conditionals", 3, "laptop"],
+    [4, "CS50P week 2: loops", 3, "laptop"],
+    [4, "CS50P week 3: exceptions", 3, "laptop"],
+    [4, "CS50P week 4: libraries", 3, "laptop"],
+    [4, "CS50P week 5: unit tests", 3, "laptop"],
+    [4, "CS50P week 6: file I/O", 3, "laptop"],
+    [4, "Redo the Calculus 1 course challenge", 2, "phone"],
+    [4, "Differentiation practice (H2 Math level)", 5, "laptop"],
+    [4, "Integration practice (H2 Math level)", 5, "laptop"],
+    [4, "Mixed practice, MA1301 style", 3, "laptop"],
+    [4, "PuLP project: install Python and PuLP", 1, "laptop"],
+    [4, "PuLP project: rebuild the Solver model", 5, "laptop"],
+    [4, "PuLP project: README and push to GitHub", 2, "laptop"],
+    [4, "PuLP project: polish and add a chart", 2, "laptop"],
+    [4, "Lean Six Sigma Yellow Belt", 12, "laptop"],
+    [4, "CV", 2, "laptop"],
+    [4, "LinkedIn profile", 1, "laptop"],
+    [4, "List 10 target companies for a vacation internship", 2, "laptop"],
+    [4, "Draft the Year 1 timetable in NUSMods", 1, "laptop"],
+    [4, "Look up NUS and external undergraduate scholarships", 1, "laptop"],
+    [4, "Checkpoint: CS50P, PuLP project, Yellow Belt, CV", 1, "laptop"],
+  ];
+  const RESOURCES = [
+    [1, "Khan Academy: Precalculus", "https://www.khanacademy.org/math/precalculus", "Calculus", "phone"],
+    [1, "Khan Academy: Calculus 1", "https://www.khanacademy.org/math/calculus-1", "Calculus", "phone"],
+    [1, "3Blue1Brown: Essence of Calculus", "https://www.3blue1brown.com/topics/calculus", "Calculus", "phone"],
+    [2, "Khan Academy: Statistics and Probability", "https://www.khanacademy.org/math/statistics-probability", "Statistics", "phone"],
+    [2, "3Blue1Brown: Essence of Linear Algebra", "https://www.3blue1brown.com/topics/linear-algebra", "Matrices", "phone"],
+    [3, "The Goal, by Eliyahu Goldratt (book)", "", "Operations", "phone"],
+    [3, "Excel Solver: any short video tutorial", "", "Optimisation", "laptop"],
+    [4, "CS50's Introduction to Programming with Python", "https://cs50.harvard.edu/python/", "Python", "laptop"],
+    [4, "PuLP documentation", "https://coin-or.github.io/pulp/", "Optimisation", "laptop"],
+    [4, "NUSMods", "https://nusmods.com", "Planning", "laptop"],
+    [4, "NUS ISE poly schedule (AY2026/27)", "https://cde.nus.edu.sg/isem/wp-content/uploads/sites/12/2026/07/AY2026-27-ISE-Recom-Schedule_Poly_July2026.pdf", "Planning", "phone"],
+  ];
+  function seedTasks() {
+    const out = []; let n = 0;
+    for (const [phase, title, k, mode] of SEED) for (let i = 1; i <= k; i++) { n++; out.push({ id: "s" + n, phase, title: k > 1 ? `${title} (${i} of ${k})` : title, mins: 60, mode, order: n, done: false, doneOn: null }); }
+    return out;
+  }
+  const seedResources = () => RESOURCES.map(([phase, title, url, skill, mode], i) => ({ id: "r" + (i + 1), phase, title, url, skill, mode, status: "todo" }));
+  const EMPTY = () => ({ v: 1, ord: "2028-05-01", tasks: seedTasks(), resources: seedResources(), logs: [], weeks: {}, ideas: [], savedAt: 0 });
+
+  function validate(o) {
+    if (!o || typeof o !== "object") throw new Error("That isn't an ISE Prep export.");
+    for (const f of ["tasks", "resources", "logs", "ideas"]) if (!Array.isArray(o[f])) throw new Error(`Missing the "${f}" list.`);
+    if (!o.weeks || typeof o.weeks !== "object" || Array.isArray(o.weeks)) throw new Error('Missing the "weeks" section.');
+    if (!keyOk(o.ord)) throw new Error("The ORD date is missing or not a date.");
+    for (const t of o.tasks) {
+      if (!t || !t.id || !t.title) throw new Error("A task is missing its id or title.");
+      if (![1, 2, 3, 4].includes(t.phase)) throw new Error(`"${t.title}" has no valid phase.`);
+      if (!(Number(t.mins) > 0)) throw new Error(`"${t.title}" has no valid length.`);
+      if (!["phone", "laptop"].includes(t.mode)) t.mode = "phone";
+      t.done = !!t.done; t.doneOn = t.done && keyOk(t.doneOn) ? t.doneOn : null; t.order = Number(t.order) || 0;
+    }
+    for (const l of o.logs) if (!l || !l.id || !keyOk(l.day) || !(Number(l.mins) > 0)) throw new Error("A study log entry is missing its day or minutes.");
+    for (const [k, w] of Object.entries(o.weeks)) {
+      if (!keyOk(k) || !w || !(Number(w.mins) >= 0) || !Array.isArray(w.days) || w.days.some(d => !(Number.isInteger(d) && d >= 0 && d <= 6))) throw new Error(`Bad weekly check-in for ${k}.`);
+      if (!["phone", "laptop", "both"].includes(w.mode)) w.mode = "both";
+    }
+    for (const r of o.resources) { if (!r || !r.id || !r.title) throw new Error("A resource is missing its id or title."); if (!["todo", "doing", "done"].includes(r.status)) r.status = "todo"; }
+    for (const i of o.ideas) if (!i || !i.id || typeof i.text !== "string") throw new Error("A process idea is missing its text.");
+    return { v: 1, ord: o.ord, tasks: o.tasks, resources: o.resources, logs: o.logs, weeks: o.weeks, ideas: o.ideas, savedAt: Number(o.savedAt) || 0 };
+  }
+
+  // ---------- Planner: pure functions, no saving ----------
+  const byPlan = (a, b) => a.phase - b.phase || a.order - b.order;
+  const ordWeek = S => weekStart(S.ord);
+  // What you'll have in a week you haven't checked in for: 1 h on Saturday during NS, 5.5 h over three days after ORD.
+  const defaultAvail = (S, wk) => wk >= ordWeek(S) ? { mins: 330, days: [0, 2, 5], mode: "both", auto: true } : { mins: 60, days: [5], mode: "both", auto: true };
+  const availability = (S, wk) => S.weeks[wk] ? { ...S.weeks[wk], auto: false } : defaultAvail(S, wk);
+  const spent = (S, id, before) => S.logs.reduce((n, l) => n + (l.taskId === id && (!before || l.day < before) ? Number(l.mins) : 0), 0);
+  const leftOf = (S, t, before) => Math.max(t.done ? 0 : 5, t.mins - spent(S, t.id, before));
+  const loggedIn = (S, wk) => S.logs.reduce((n, l) => n + (l.day >= wk && l.day <= addDays(wk, 6) ? Number(l.mins) : 0), 0);
+
+  // Fills the week's free minutes, day by day, with the next tasks in plan order. Unfinished tasks from earlier
+  // weeks come first, because they are still next in order. A phone-only week skips laptop tasks.
+  // Uses time logged before this week only, so the week's plan doesn't reshuffle as you tick things off.
+  function planWeek(S, wk) {
+    const av = availability(S, wk);
+    if (!(av.mins > 0)) return { av, sessions: [] };
+    const days = av.days.length ? [...av.days].sort((a, b) => a - b) : [5];
+    const queue = S.tasks.filter(t => (!t.done || (t.doneOn && t.doneOn >= wk)) && (av.mode !== "phone" || t.mode === "phone")).sort(byPlan)
+      .map(t => ({ t, left: t.done ? Math.max(5, t.mins - spent(S, t.id, wk)) : leftOf(S, t, wk) }));
+    const per = Math.floor(av.mins / days.length / 5) * 5, extra = av.mins - per * days.length;
+    const sessions = []; let q = 0;
+    days.forEach((d, i) => {
+      let budget = per + (i === 0 ? extra : 0);
+      while (budget >= 5 && q < queue.length) {
+        const item = queue[q], m = Math.min(item.left, budget);
+        sessions.push({ day: addDays(wk, d), taskId: item.t.id, mins: m });
+        item.left -= m; budget -= m;
+        if (item.left <= 0) q++;
+      }
+    });
+    return { av, sessions };
+  }
+  // When each phase's work would be finished at the time you've said you have (check-ins), or the defaults.
+  function project(S, phaseId, from) {
+    const ph = PHASES.find(p => p.id === phaseId);
+    let left = S.tasks.filter(t => t.phase <= phaseId && !t.done).reduce((n, t) => n + leftOf(S, t), 0);
+    if (left <= 0) return { done: true };
+    let wk = weekStart(from || today()), n = 0;
+    while (n < 520) {
+      let cap = availability(S, wk).mins;
+      if (n === 0) cap = Math.max(0, cap - loggedIn(S, wk));
+      left -= cap;
+      if (left <= 0) break;
+      wk = addDays(wk, 7); n++;
+    }
+    const finish = addDays(wk, 6);
+    if (n >= 520) return { finish: null, late: Infinity };
+    return { finish, late: finish > ph.end ? Math.ceil(daysBetween(ph.end, finish) / 7) : 0 };
+  }
+  const currentPhase = S => (S.tasks.filter(t => !t.done).sort(byPlan)[0] || { phase: 4 }).phase;
+  window.ISEPrep = { planWeek, project, availability, weekStart, validate, EMPTY };
+
+  // ---------- Storage: localStorage on this phone ----------
+  const LS = "iseprep-v1";
+  let S = null, LOCKED = null, saveErr = false;
+  let tab = "today";
+  let ui = { sheet: null, open: {}, msg: "", err: "", exportShown: false, confirm: null };
+
+  function cacheLocal() {
+    if (LOCKED !== null || !S) return false;
+    const txt = JSON.stringify(S);
+    try { localStorage.setItem(LS, txt); }
+    catch (e) {
+      let ok = false;
+      if (pruneBackups(2, 1)) { try { localStorage.setItem(LS, txt); ok = true; } catch (e2) {} }
+      if (!ok) { saveErr = true; showSaveErr(); return false; }
+    }
+    if (saveErr) { saveErr = false; showSaveErr(); }
+    return true;
+  }
+  function readLocal() {
+    let t = null;
+    try { t = localStorage.getItem(LS); } catch (e) { LOCKED = ""; return null; }
+    if (!t) return null;
+    try { return validate(JSON.parse(t)); } catch (e) { LOCKED = t; return null; }
+  }
+  function showSaveErr() {
+    const el = document.getElementById("saveerr");
+    el.hidden = !saveErr;
+    el.innerHTML = saveErr ? `<p><b>Your last change wasn't saved.</b> This phone refused to store it. Export your data from More now to keep a copy.</p><div class="btns"><button type="button" class="btn small" data-act="retrySave">Try saving again</button></div>` : "";
+  }
+
+  // Automatic backups on this phone: one per day you use the app (last 7), plus one before every
+  // import, restore or reset (last 5). Each is its own localStorage key and never goes into an export.
+  const BAK = "iseprep-bak:";
+  const KEEP_DAILY = 7, KEEP_SAFETY = 5;
+  const BAK_WHY = { daily: "Daily copy", "before-restore": "Before a restore", "before-import": "Before an import", "before-reset": "Before Start over", unreadable: "Data that couldn't be read" };
+  function listBackups() {
+    const out = [];
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (!k || !k.startsWith(BAK)) continue;
+        try { const b = JSON.parse(localStorage.getItem(k)); if (b && typeof b.data === "string") out.push({ key: k, at: Number(b.at) || 0, reason: b.reason || "daily", data: b.data }); } catch (e) {}
+      }
+    } catch (e) {}
+    return out.sort((a, b) => b.at - a.at);
+  }
+  function pruneBackups(daily = KEEP_DAILY, safety = KEEP_SAFETY) {
+    let n = 0, d = 0, s = 0;
+    for (const b of listBackups()) {
+      if (b.reason === "unreadable") continue;
+      const keep = b.reason === "daily" ? d++ < daily : s++ < safety;
+      if (!keep) { try { localStorage.removeItem(b.key); n++; } catch (e) {} }
+    }
+    return n;
+  }
+  function writeBackup(reason, text) {
+    if (!text) return false;
+    const at = Date.now(), key = BAK + (reason === "daily" ? today() : at + "-" + reason);
+    const val = JSON.stringify({ at, reason, data: text });
+    try { localStorage.setItem(key, val); }
+    catch (e) { if (!pruneBackups(3, 2)) return false; try { localStorage.setItem(key, val); } catch (e2) { return false; } }
+    pruneBackups();
+    return true;
+  }
+  let bakDay = null;
+  function dailyBackup() {
+    if (LOCKED !== null) return;
+    const t = today(); if (bakDay === t) return;
+    try {
+      if (localStorage.getItem(BAK + t)) { bakDay = t; return; }
+      const txt = localStorage.getItem(LS);
+      if (txt && writeBackup("daily", txt)) bakDay = t;
+    } catch (e) {}
+  }
+  function save() {
+    if (LOCKED !== null || !S) return;
+    dailyBackup();
+    S.savedAt = Date.now();
+    cacheLocal();
+  }
+
+  // ---------- Rendering ----------
+  const view = document.getElementById("view");
+  const taskById = id => S.tasks.find(t => t.id === id);
+  const modeTag = m => `<span class="tag ${m === "laptop" ? "laptop" : ""}">${m}</span>`;
+  const phaseName = id => PHASES.find(p => p.id === id).name;
+  const thisWeek = () => weekStart(today());
+  const availText = av => av.mins > 0 ? `${hm(av.mins)} on ${av.days.length ? av.days.map(d => DAYS[d]).join(", ") : "Sat"}${av.mode === "both" ? "" : `, ${av.mode} only`}` : "No time this week";
+  function projLine(id) {
+    const p = project(S, id);
+    if (p.done) return `<span class="status ok">Done</span>`;
+    if (!p.finish) return `<span class="status late">At this pace it won't finish. Check in with more time.</span>`;
+    return p.late ? `<span class="status late">On course for ${fmtMonth(p.finish)}, about ${p.late} week${p.late === 1 ? "" : "s"} behind</span>` : `<span class="status ok">On track: done by about ${fmtMonth(p.finish)}</span>`;
+  }
+
+  function renderToday() {
+    const wk = thisWeek(), { av, sessions } = planWeek(S, wk), ph = PHASES.find(p => p.id === currentPhase(S));
+    const pt = S.tasks.filter(t => t.phase === ph.id), pd = pt.filter(t => t.done).length;
+    let h = "";
+    if (av.auto) h += `<div class="card warn"><b>How free are you this week?</b><p class="small">Until you check in, the plan assumes ${availText(av)}.</p><div class="btns"><button type="button" class="btn" data-act="checkin" data-wk="${wk}">Check in for this week</button></div></div>`;
+    const next = addDays(wk, 7), dow = (parse(today()).getDay() + 6) % 7;
+    if (dow >= 5 && !S.weeks[next]) h += `<div class="card accent"><b>Next week's check-in</b><p class="small">Tell the app how free you'll be next week, before you book in.</p><div class="btns"><button type="button" class="btn" data-act="checkin" data-wk="${next}">Check in for next week</button></div></div>`;
+    h += `<div class="card"><h2>This week's plan</h2><p class="small muted">${availText(av)}${av.auto ? "" : ` · <a href="#" data-act="checkin" data-wk="${wk}">change</a>`}</p>`;
+    if (!sessions.length) h += `<p class="muted">${av.mins > 0 ? "Nothing left to plan. Everything is done." : "No study planned. That's fine; the plan moves on next week."}</p>`;
+    let lastDay = null;
+    for (const s of sessions) {
+      const t = taskById(s.taskId);
+      if (s.day !== lastDay) { h += `<h3>${fmtDay(s.day)}${s.day === today() ? " · today" : ""}</h3>`; lastDay = s.day; }
+      h += `<div class="row ${t.done ? "done" : ""}"><button type="button" class="chk ${t.done ? "on" : ""}" data-act="toggle" data-id="${t.id}" aria-label="${t.done ? "Mark not done" : "Mark done"}"></button><div class="grow"><div class="title">${esc(t.title)}</div><div class="small muted">${hm(s.mins)} ${modeTag(t.mode)}</div></div><button type="button" class="btn small ghost" data-act="log" data-id="${t.id}" data-mins="${s.mins}">Log</button></div>`;
+    }
+    const done = loggedIn(S, wk);
+    h += `<p class="small muted" style="margin-top:10px">Logged this week: ${hm(done)}</p></div>`;
+    h += `<div class="card"><p class="eyebrow">Phase ${ph.id} · ${fmtMonth(ph.start)} to ${fmtMonth(ph.end)}</p><h2>${esc(ph.name)}</h2><div class="bar"><i style="width:${pt.length ? Math.round(pd / pt.length * 100) : 0}%"></i></div><p class="small muted">${pd} of ${pt.length} sessions done</p><p class="small"><b>Checkpoint:</b> ${esc(ph.checkpoint)}</p><p>${projLine(ph.id)}</p></div>`;
+    h += `<div class="btns"><button type="button" class="btn ghost" data-act="log">Log other study time</button></div>`;
+    return h;
+  }
+
+  function renderPlan() {
+    let h = "";
+    for (const ph of PHASES) {
+      const pt = S.tasks.filter(t => t.phase === ph.id).sort(byPlan), pd = pt.filter(t => t.done).length, open = !!ui.open[ph.id];
+      h += `<div class="card"><p class="eyebrow">Phase ${ph.id} · ${fmtMonth(ph.start)} to ${fmtMonth(ph.end)}</p><h2>${esc(ph.name)}</h2><p class="small">${esc(ph.goal)}</p><div class="bar"><i style="width:${pt.length ? Math.round(pd / pt.length * 100) : 0}%"></i></div><p class="small muted">${pd} of ${pt.length} done</p><p class="small"><b>Checkpoint:</b> ${esc(ph.checkpoint)}</p><p>${projLine(ph.id)}</p><div class="btns"><button type="button" class="btn small ghost" data-act="openPhase" data-ph="${ph.id}">${open ? "Hide tasks" : "Show tasks"}</button></div>`;
+      if (open) {
+        for (const t of pt) {
+          const sp = spent(S, t.id);
+          h += `<div class="row ${t.done ? "done" : ""}"><button type="button" class="chk ${t.done ? "on" : ""}" data-act="toggle" data-id="${t.id}" aria-label="${t.done ? "Mark not done" : "Mark done"}"></button><div class="grow"><div class="title">${esc(t.title)}</div><div class="small muted">${hm(t.mins)}${sp ? `, ${hm(sp)} logged` : ""} ${modeTag(t.mode)}</div></div>${t.custom ? `<button type="button" class="btn small ghost" data-act="delTask" data-id="${t.id}">Remove</button>` : ""}</div>`;
+        }
+        h += `<form data-form="addTask" data-ph="${ph.id}"><label>Add a task to this phase</label><input name="title" placeholder="What to do" required maxlength="120"><div class="stats" style="margin-top:6px"><div><select name="mins">${[15, 30, 45, 60, 90, 120].map(m => `<option value="${m}" ${m === 60 ? "selected" : ""}>${hm(m)}</option>`).join("")}</select></div><div><select name="mode"><option value="phone">Phone</option><option value="laptop">Laptop</option></select></div></div><div class="btns"><button class="btn small">Add task</button></div></form>`;
+      }
+      h += `</div>`;
+    }
+    return h;
+  }
+
+  function renderLog() {
+    const wk = thisWeek(), weeks = [];
+    for (let i = 11; i >= 0; i--) { const w = addDays(wk, -7 * i); weeks.push({ w, m: loggedIn(S, w) }); }
+    const max = Math.max(60, ...weeks.map(x => x.m));
+    // Weeks in a row with some study. This week only counts once something is logged, so Monday doesn't break it.
+    let streak = 0, w = loggedIn(S, wk) > 0 ? wk : addDays(wk, -7);
+    while (streak < 520 && loggedIn(S, w) > 0) { streak++; w = addDays(w, -7); }
+    const total = S.logs.reduce((n, l) => n + Number(l.mins), 0);
+    let h = `<div class="card"><div class="stats"><div><b>${hm(total)}</b><span class="small muted">studied in total</span></div><div><b>${streak}</b><span class="small muted">week streak</span></div></div><div class="weeks">${weeks.map(x => `<div class="${x.m ? "" : "zero"}" style="height:${Math.max(2, Math.round(x.m / max * 100))}%" title="${hm(x.m)}"></div>`).join("")}</div><div class="weeklbl"><span>${fmtDay(weeks[0].w)}</span><span>This week</span></div></div>`;
+    h += `<div class="card"><h2>Recent study</h2>`;
+    const recent = [...S.logs].sort((a, b) => b.day.localeCompare(a.day) || b.id.localeCompare(a.id)).slice(0, 40);
+    if (!recent.length) h += `<p class="muted">Nothing logged yet. Tap Log next to a task on This week.</p>`;
+    for (const l of recent) { const t = l.taskId && taskById(l.taskId); h += `<div class="row"><div class="grow"><div class="title">${esc(t ? t.title : l.topic || "Study")}</div><div class="small muted">${fmtDay(l.day)} · ${hm(l.mins)}</div></div><button type="button" class="btn small ghost" data-act="delLog" data-id="${l.id}">Delete</button></div>`; }
+    h += `</div><div class="btns"><button type="button" class="btn" data-act="log">Log study time</button></div>`;
+    return h;
+  }
+
+  function renderLibrary() {
+    const label = { todo: "To do", doing: "Doing", done: "Done" };
+    let h = "";
+    for (const ph of PHASES) {
+      const rs = S.resources.filter(r => r.phase === ph.id);
+      if (!rs.length) continue;
+      h += `<div class="card"><p class="eyebrow">Phase ${ph.id}</p><h2>${esc(ph.name)}</h2>`;
+      for (const r of rs) h += `<div class="row ${r.status === "done" ? "done" : ""}"><div class="grow"><div class="title">${r.url ? `<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.title)}</a>` : esc(r.title)}</div><div class="small muted">${esc(r.skill || "")} ${modeTag(r.mode)}</div></div><button type="button" class="btn small ghost" data-act="cycleRes" data-id="${r.id}">${label[r.status]}</button></div>`;
+      h += `</div>`;
+    }
+    h += `<div class="card"><form data-form="addRes"><h2>Add a resource</h2><label>Title</label><input name="title" required maxlength="120"><label>Link (optional)</label><input name="url" type="url" placeholder="https://"><div class="stats" style="margin-top:6px"><div><label>Phase</label><select name="phase">${PHASES.map(p => `<option value="${p.id}">${p.id}. ${esc(p.name)}</option>`).join("")}</select></div><div><label>Where</label><select name="mode"><option value="phone">Phone</option><option value="laptop">Laptop</option></select></div></div><div class="btns"><button class="btn small">Add resource</button></div></form></div>`;
+    return h;
+  }
+
+  function renderMore() {
+    let h = `<div class="card"><h2>ORD date</h2><p class="small muted">From the week of ORD, weeks you haven't checked in for assume 5.5 hours over Mon, Wed and Sat instead of 1 hour on Sat.</p><form data-form="ord"><input type="date" name="ord" value="${S.ord}" required><div class="btns"><button class="btn small">Save ORD date</button></div></form></div>`;
+    h += `<div class="card"><h2>Process ideas from NS</h2><p class="small muted">Bottlenecks or wasteful processes you notice. Leave out names and anything sensitive. The best one becomes a case study.</p><form data-form="idea"><input name="text" placeholder="e.g. Queue at the stores counter on Mondays" required maxlength="300"><div class="btns"><button class="btn small">Add idea</button></div></form>`;
+    for (const i of [...S.ideas].reverse()) h += `<div class="row"><div class="grow"><div class="title">${esc(i.text)}</div><div class="small muted">${fmtDay(i.day)}</div></div><button type="button" class="btn small ghost" data-act="delIdea" data-id="${i.id}">Delete</button></div>`;
+    h += `</div>`;
+    h += `<div class="card"><h2>Your data</h2><p class="small muted">Everything is stored only on this phone. Export now and then to keep a copy somewhere safe.</p>${ui.msg ? `<p class="msg">${esc(ui.msg)}</p>` : ""}<div class="btns"><button type="button" class="btn small" data-act="export">${ui.exportShown ? "Hide export" : "Export"}</button><button type="button" class="btn small ghost" data-act="download">Download file</button></div>`;
+    if (ui.exportShown) h += `<label>Copy this text and keep it somewhere safe</label><textarea readonly id="exportText">${esc(JSON.stringify(S))}</textarea>`;
+    h += `<form data-form="import"><label>Import: paste an export here</label><textarea name="text" placeholder="{&quot;v&quot;:1, ...}"></textarea>${ui.err ? `<p class="err">${esc(ui.err)}</p>` : ""}<div class="btns"><button class="btn small ghost">Import</button></div></form></div>`;
+    const baks = listBackups();
+    h += `<div class="card"><h2>Automatic backups</h2><p class="small muted">One a day (last 7) and one before every import, restore or Start over (last 5).</p>`;
+    if (!baks.length) h += `<p class="small muted">None yet. The first one is made the first time you change something on a new day.</p>`;
+    for (const b of baks.slice(0, 15)) h += `<div class="row"><div class="grow"><div class="title">${BAK_WHY[b.reason] || b.reason}</div><div class="small muted">${new Date(b.at).toLocaleString()}</div></div><button type="button" class="btn small ghost" data-act="restore" data-key="${esc(b.key)}">Restore</button></div>`;
+    h += `</div>`;
+    h += `<div class="card"><h2>Start over</h2><p class="small muted">Clears your logs and check-ins and reloads the original plan. A backup is kept first.</p>${ui.confirm === "reset" ? `<p><b>Are you sure?</b></p><div class="btns"><button type="button" class="btn danger small" data-act="resetYes">Yes, start over</button><button type="button" class="btn ghost small" data-act="cancel">Cancel</button></div>` : `<div class="btns"><button type="button" class="btn ghost small" data-act="reset">Start over</button></div>`}</div>`;
+    h += `<p class="small muted">ISE Prep ${VERSION}. How planning works: each week's free time is filled with the next unfinished tasks in plan order. Anything unfinished carries into next week. The projection assumes the time from your check-ins, and the defaults for weeks you haven't checked in yet.</p>`;
+    return h;
+  }
+
+  function renderLocked() {
+    document.getElementById("eyebrow").textContent = "Your data needs attention";
+    document.getElementById("heading").textContent = "Couldn't read your saved data";
+    view.innerHTML = `<div class="card warn"><p>The saved data on this phone couldn't be read, so the app hasn't changed or overwritten it.</p><p class="small">Copy the text below and keep it. You can try importing it later, or restore an automatic backup from before the problem.</p><textarea readonly>${esc(LOCKED)}</textarea><div class="btns"><button type="button" class="btn" data-act="lockedFresh">Keep a copy and start fresh</button></div></div>` +
+      listBackups().filter(b => b.reason !== "unreadable").slice(0, 7).map(b => `<div class="row"><div class="grow"><div class="title">${BAK_WHY[b.reason] || b.reason}</div><div class="small muted">${new Date(b.at).toLocaleString()}</div></div><button type="button" class="btn small ghost" data-act="restore" data-key="${esc(b.key)}">Restore</button></div>`).join("");
+  }
+
+  function renderSheet() {
+    const el = document.getElementById("sheet"), s = ui.sheet;
+    if (!s) { el.innerHTML = ""; return; }
+    let h = "";
+    if (s.kind === "checkin") {
+      const cur = s.draft;
+      h = `<h2>How free are you, week of ${fmtDay(s.wk)}?</h2><p class="small muted">Count only time you'll really have. Field camp or stay-in week? Pick 0.</p><label>Total time</label><div class="chips">${[0, 30, 60, 90, 120, 180, 240, 330, 420].map(m => `<button type="button" class="chip ${cur.mins === m ? "on" : ""}" data-act="ciMins" data-m="${m}">${m ? hm(m) : "0"}</button>`).join("")}</div><label>Which days</label><div class="chips">${DAYS.map((d, i) => `<button type="button" class="chip ${cur.days.includes(i) ? "on" : ""}" data-act="ciDay" data-d="${i}">${d}</button>`).join("")}</div><label>Where you'll study</label><div class="chips">${[["phone", "Phone only"], ["laptop", "Laptop"], ["both", "Both"]].map(([v, l]) => `<button type="button" class="chip ${cur.mode === v ? "on" : ""}" data-act="ciMode" data-v="${v}">${l}</button>`).join("")}</div><p class="small">${availText({ ...cur, days: cur.days })}</p><div class="btns"><button type="button" class="btn" data-act="ciSave">Save check-in</button><button type="button" class="btn ghost" data-act="close">Cancel</button></div>`;
+    } else if (s.kind === "log") {
+      const pend = S.tasks.filter(t => !t.done).sort(byPlan).slice(0, 25);
+      h = `<h2>Log study time</h2><form data-form="log"><label>Minutes</label><div class="chips">${[15, 30, 45, 60, 90].map(m => `<button type="button" class="chip ${s.mins === m ? "on" : ""}" data-act="logMins" data-m="${m}">${m}</button>`).join("")}</div><input name="mins" type="number" min="1" max="600" value="${s.mins}" required><label>What you studied</label><select name="taskId"><option value="">Something else</option>${pend.map(t => `<option value="${t.id}" ${t.id === s.taskId ? "selected" : ""}>${esc(t.title)}</option>`).join("")}</select><label>Note (for something else)</label><input name="topic" maxlength="120" placeholder="e.g. Watched a stats video"><label><input type="checkbox" name="done" style="width:auto"> Mark the task done</label><div class="btns"><button class="btn">Save</button><button type="button" class="btn ghost" data-act="close">Cancel</button></div></form>`;
+    }
+    el.innerHTML = `<div class="back" data-act="close"></div><div class="panel" role="dialog" aria-modal="true"><div class="in">${h}</div></div>`;
+  }
+
+  function render() {
+    if (LOCKED !== null) { renderLocked(); return; }
+    const titles = { today: ["Week of " + fmtDay(thisWeek()), "This week"], plan: ["Dec 2026 to Jul 2028", "Your plan"], log: ["Study log", "Progress"], library: ["Courses, books, videos", "Library"], more: ["Settings and data", "More"] };
+    document.getElementById("eyebrow").textContent = titles[tab][0];
+    document.getElementById("heading").textContent = titles[tab][1];
+    for (const b of document.querySelectorAll("nav.tabs button")) b.classList.toggle("on", b.dataset.tab === tab);
+    view.innerHTML = { today: renderToday, plan: renderPlan, log: renderLog, library: renderLibrary, more: renderMore }[tab]();
+    renderSheet();
+  }
+
+  // ---------- Actions ----------
+  function setDone(t, on) { t.done = on; t.doneOn = on ? today() : null; }
+  document.addEventListener("click", e => {
+    const tb = e.target.closest("nav.tabs button");
+    if (tb) { tab = tb.dataset.tab; ui.msg = ""; ui.err = ""; ui.confirm = null; render(); window.scrollTo(0, 0); return; }
+    const a = e.target.closest("[data-act]"); if (!a) return;
+    const act = a.dataset.act, id = a.dataset.id;
+    if (a.tagName === "A") e.preventDefault();
+    if (LOCKED !== null && !["lockedFresh", "restore"].includes(act)) return;
+    switch (act) {
+      case "toggle": { const t = taskById(id); setDone(t, !t.done); save(); break; }
+      case "checkin": { const wk = a.dataset.wk, av = availability(S, wk); ui.sheet = { kind: "checkin", wk, draft: { mins: av.mins, days: [...av.days], mode: av.mode } }; break; }
+      case "ciMins": ui.sheet.draft.mins = Number(a.dataset.m); break;
+      case "ciDay": { const d = Number(a.dataset.d), ds = ui.sheet.draft.days; ui.sheet.draft.days = ds.includes(d) ? ds.filter(x => x !== d) : [...ds, d].sort((x, y) => x - y); break; }
+      case "ciMode": ui.sheet.draft.mode = a.dataset.v; break;
+      case "ciSave": { const d = ui.sheet.draft; S.weeks[ui.sheet.wk] = { mins: d.mins, days: d.days.length ? d.days : [5], mode: d.mode }; ui.sheet = null; save(); break; }
+      case "log": ui.sheet = { kind: "log", taskId: id || "", mins: Number(a.dataset.mins) || 30 }; break;
+      case "logMins": { const inp = document.querySelector('#sheet input[name="mins"]'); if (inp) inp.value = a.dataset.m; ui.sheet.mins = Number(a.dataset.m); for (const c of document.querySelectorAll('#sheet [data-act="logMins"]')) c.classList.toggle("on", c === a); return; }
+      case "close": ui.sheet = null; break;
+      case "openPhase": ui.open[a.dataset.ph] = !ui.open[a.dataset.ph]; break;
+      case "delTask": S.tasks = S.tasks.filter(t => t.id !== id); S.logs.forEach(l => { if (l.taskId === id) l.taskId = null; }); save(); break;
+      case "delLog": S.logs = S.logs.filter(l => l.id !== id); save(); break;
+      case "cycleRes": { const r = S.resources.find(x => x.id === id); r.status = { todo: "doing", doing: "done", done: "todo" }[r.status]; save(); break; }
+      case "delIdea": S.ideas = S.ideas.filter(i => i.id !== id); save(); break;
+      case "export": ui.exportShown = !ui.exportShown; break;
+      case "download": { const blob = new Blob([JSON.stringify(S, null, 1)], { type: "application/json" }); const u = URL.createObjectURL(blob); const l = document.createElement("a"); l.href = u; l.download = `ise-prep-${today()}.json`; document.body.appendChild(l); l.click(); l.remove(); setTimeout(() => URL.revokeObjectURL(u), 1000); return; }
+      case "restore": {
+        const b = listBackups().find(x => x.key === a.dataset.key); if (!b) break;
+        let d; try { d = validate(JSON.parse(b.data)); } catch (err) { ui.err = "That backup couldn't be read."; break; }
+        if (LOCKED === null) writeBackup("before-restore", JSON.stringify(S));
+        else { writeBackup("unreadable", LOCKED); LOCKED = null; }
+        S = d; cacheLocal(); ui.msg = "Backup restored."; tab = LOCKED === null ? tab : "today"; break;
+      }
+      case "reset": ui.confirm = "reset"; break;
+      case "cancel": ui.confirm = null; break;
+      case "resetYes": writeBackup("before-reset", JSON.stringify(S)); S = EMPTY(); ui.confirm = null; save(); ui.msg = "Started over with the original plan."; break;
+      case "lockedFresh": writeBackup("unreadable", LOCKED); LOCKED = null; S = EMPTY(); save(); tab = "today"; break;
+      case "retrySave": save(); break;
+    }
+    render();
+  });
+  document.addEventListener("submit", e => {
+    const f = e.target.closest("form[data-form]"); if (!f) return;
+    e.preventDefault();
+    if (LOCKED !== null) return;
+    const v = n => (f.elements[n] ? f.elements[n].value : "").trim();
+    switch (f.dataset.form) {
+      case "addTask": { const ph = Number(f.dataset.ph), mx = Math.max(0, ...S.tasks.map(t => t.order)); if (!v("title")) return; S.tasks.push({ id: uid(), phase: ph, title: v("title"), mins: Number(v("mins")) || 60, mode: v("mode") === "laptop" ? "laptop" : "phone", order: mx + 1, done: false, doneOn: null, custom: true }); break; }
+      case "log": {
+        const mins = Math.round(Number(v("mins"))); if (!(mins > 0 && mins <= 600)) return;
+        const taskId = v("taskId") || null;
+        S.logs.push({ id: uid(), day: today(), mins, taskId, topic: taskId ? "" : v("topic") });
+        if (taskId && f.elements.done.checked) setDone(taskById(taskId), true);
+        ui.sheet = null; break;
+      }
+      case "addRes": { if (!v("title")) return; const url = v("url"); S.resources.push({ id: uid(), phase: Number(v("phase")) || 1, title: v("title"), url: /^https?:\/\//.test(url) ? url : "", skill: "", mode: v("mode") === "laptop" ? "laptop" : "phone", status: "todo" }); break; }
+      case "ord": { const d = v("ord"); if (!keyOk(d)) return; S.ord = d; ui.msg = ""; break; }
+      case "idea": { if (!v("text")) return; S.ideas.push({ id: uid(), day: today(), text: v("text") }); break; }
+      case "import": {
+        let d; try { d = validate(JSON.parse(v("text"))); } catch (err) { ui.err = "Couldn't import: " + (err.message || "that isn't valid export text."); render(); return; }
+        writeBackup("before-import", JSON.stringify(S)); S = d; ui.err = ""; ui.msg = "Imported. Your previous data is kept as a backup."; break;
+      }
+    }
+    save(); render();
+  });
+
+  // ---------- Start ----------
+  S = readLocal();
+  if (LOCKED === null && !S) { S = EMPTY(); cacheLocal(); }
+  render();
+  if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) navigator.serviceWorker.register("sw.js").catch(() => {});
+})();
+</script>
+</body>
+</html>
