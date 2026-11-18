@@ -25,6 +25,8 @@ jobs:
         run: node tests/app.js
       - name: Lessons (every question generator, a lesson, the writing and puzzle activities)
         run: node tests/lessons.js
+      - name: XP, streaks, Kai and Quick cards
+        run: node tests/fun.js
       - name: Version was bumped (needed for phones to pick up the update)
         run: |
           if git cat-file -e origin/main:index.html 2>/dev/null; then
