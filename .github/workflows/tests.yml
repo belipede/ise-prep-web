@@ -1,0 +1,35 @@
+# Runs the app's tests on every pull request, before anything is merged and published to the phone.
+# Uses Chromium on a simulated iPhone; it can't test Safari on a real iPhone.
+name: Tests
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install Playwright (test tool only, not part of the app)
+        run: |
+          npm install --no-save --no-package-lock playwright@1.49.1
+          npx playwright install --with-deps chromium
+      - name: App tests (planner, screens, data safety)
+        run: node tests/app.js
+      - name: Lessons (every question generator, a lesson, the writing and puzzle activities)
+        run: node tests/lessons.js
+      - name: Version was bumped (needed for phones to pick up the update)
+        run: |
+          if git cat-file -e origin/main:index.html 2>/dev/null; then
+            old=$(git show origin/main:index.html | grep -o 'const VERSION = "v[^"]*"')
+            new=$(grep -o 'const VERSION = "v[^"]*"' index.html)
+            echo "main: $old  this PR: $new"
+            if [ "$old" = "$new" ] && ! git diff --quiet origin/main -- index.html; then echo "index.html changed but VERSION did not"; exit 1; fi
+          else echo "No index.html on main yet (first version)"; fi
