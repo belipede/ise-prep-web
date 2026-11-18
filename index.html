@@ -82,6 +82,16 @@ nav.tabs button.on { color: var(--accent); font-weight: 700; }
 #sheet .back { z-index: 20; position: fixed; inset: 0; background: rgba(0,0,0,.35); }
 #sheet .panel { z-index: 21; position: fixed; left: 0; right: 0; bottom: 0; max-height: 88vh; overflow: auto; background: var(--bg); border-radius: 20px 20px 0 0; padding: 18px 16px calc(env(safe-area-inset-bottom, 0px) + 18px); }
 #sheet .panel .in { max-width: 560px; margin: 0 auto; }
+table.xl { border-collapse: collapse; margin: 8px 0; font-size: 14px; }
+table.xl td, table.xl th { border: 1px solid var(--line); padding: 4px 8px; text-align: left; }
+.notes { font-size: 15px; }
+.notes p { margin: 8px 0; }
+.choice { display: block; width: 100%; text-align: left; font: inherit; font-size: 15px; margin: 6px 0; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
+.choice.right { border-color: var(--good); background: var(--good-soft); }
+.choice.wrong { border-color: #b3261e; }
+.fb { border-radius: 12px; padding: 10px 12px; margin: 10px 0; font-size: 14px; }
+.fb.right { background: var(--good-soft); } .fb.wrong { background: var(--warn-soft); }
+.qcount { font-size: 13px; color: var(--muted); font-weight: 600; }
 .msg { color: var(--good); font-weight: 600; font-size: 14px; }
 .err { color: #b3261e; font-weight: 600; font-size: 14px; }
 </style>
@@ -100,7 +110,7 @@ nav.tabs button.on { color: var(--accent); font-weight: 700; }
   <button type="button" data-tab="today">This week</button>
   <button type="button" data-tab="plan">Plan</button>
   <button type="button" data-tab="log">Log</button>
-  <button type="button" data-tab="library">Library</button>
+  <button type="button" data-tab="learn">Learn</button>
   <button type="button" data-tab="more">More</button>
 </div></nav>
 
@@ -124,45 +134,45 @@ nav.tabs button.on { color: var(--accent); font-weight: 700; }
   const hm = m => { m = Math.round(m); if (m < 60) return `${m} min`; const h = Math.floor(m / 60), r = m % 60; return r ? `${h} h ${r} min` : `${h} h`; };
 
   // ---------- The plan: phases and starting tasks (from the NUS ISE prep doc, Nov 2026) ----------
-  const VERSION = "v1.0.0";
+  const VERSION = "v1.1.0";
   const PHASES = [
-    { id: 1, name: "Calculus first", start: "2026-12-01", end: "2027-07-31", goal: "Differentiate and integrate the common functions confidently, so MA1301 is review and MA1511 is manageable.", checkpoint: "80% on Khan Academy's Calculus 1 course challenge, and quick-check questions 1 to 3 right." },
-    { id: 2, name: "Stats and matrices", start: "2027-08-01", end: "2028-01-31", goal: "Put proper names to your stats intuition and get solid with systems of equations and matrices.", checkpoint: "Quick-check questions 4 to 6 right, and explain standard deviation in one sentence." },
+    { id: 1, name: "Calculus first", start: "2026-12-01", end: "2027-07-31", goal: "Differentiate and integrate the common functions confidently, so MA1301 is review and MA1511 is manageable.", checkpoint: "80% or more on the in-app calculus checkpoint, including the interview questions 1 to 3." },
+    { id: 2, name: "Stats and matrices", start: "2027-08-01", end: "2028-01-31", goal: "Put proper names to your stats intuition and get solid with systems of equations and matrices.", checkpoint: "80% or more on the in-app statistics and matrices checkpoint, including interview questions 4 to 6." },
     { id: 3, name: "Your story and Solver", start: "2028-02-01", end: "2028-04-30", goal: "Turn the experience you already have into portfolio material before ORD.", checkpoint: "A True Digital Park case study draft and a first Solver model." },
     { id: 4, name: "After ORD", start: "2028-05-01", end: "2028-07-31", goal: "Walk into Week 1 with Python back, math warmed up and a CV ready.", checkpoint: "CS50P to week 6, the PuLP project on GitHub, Lean Six Sigma Yellow Belt and a CV." },
   ];
-  // [phase, title, sessions of 60 min, "phone" | "laptop"]
+  // [phase, title, sessions of 60 min, "phone" | "laptop", in-app lesson]. Phases 1 to 3 are all in the app (NS).
   const SEED = [
-    [1, "Precalculus: functions and graphs", 2, "phone"],
-    [1, "Exponentials and logarithms", 2, "phone"],
-    [1, "Limits: the idea", 3, "phone"],
-    [1, "Derivatives: definition and power rule", 2, "phone"],
-    [1, "Product and quotient rules", 2, "phone"],
-    [1, "Chain rule", 3, "phone"],
-    [1, "Derivatives of e^x, ln x, sin and cos", 3, "phone"],
-    [1, "Maxima and minima (first taste of optimisation)", 4, "phone"],
-    [1, "Antiderivatives", 2, "phone"],
-    [1, "Definite integrals", 3, "phone"],
-    [1, "Integration by substitution", 2, "phone"],
-    [1, "Checkpoint: Calculus 1 course challenge and quick-check Q1 to Q3", 1, "phone"],
-    [2, "Mean, median and quartiles", 2, "phone"],
-    [2, "Standard deviation and box plots", 2, "phone"],
-    [2, "Counting and basic probability", 2, "phone"],
-    [2, "Combining events and conditional probability", 3, "phone"],
-    [2, "Normal distribution", 2, "phone"],
-    [2, "Binomial distribution", 2, "phone"],
-    [2, "Sampling: the idea", 1, "phone"],
-    [2, "Solving systems of equations", 2, "phone"],
-    [2, "Matrix multiplication", 2, "phone"],
-    [2, "Determinants", 1, "phone"],
-    [2, "Checkpoint: quick-check Q4 to Q6, explain standard deviation", 1, "phone"],
-    [3, "True Digital Park case study: outline", 1, "phone"],
-    [3, "True Digital Park case study: draft", 2, "laptop"],
-    [3, "Excel XLOOKUP", 1, "laptop"],
-    [3, "Excel Solver basics", 2, "laptop"],
-    [3, "Solver model: cheapest meal plan that hits your protein target", 2, "laptop"],
-    [3, "Read The Goal (Goldratt)", 1, "phone"],
-    [3, "Checkpoint: case study draft and Solver model done", 1, "laptop"],
+    [1, "Precalculus: functions and graphs", 2, "phone", "functions"],
+    [1, "Exponentials and logarithms", 2, "phone", "explog"],
+    [1, "Limits: the idea", 3, "phone", "limits"],
+    [1, "Derivatives: definition and power rule", 2, "phone", "power"],
+    [1, "Product and quotient rules", 2, "phone", "product"],
+    [1, "Chain rule", 3, "phone", "chain"],
+    [1, "Derivatives of e^x, ln x, sin and cos", 3, "phone", "special"],
+    [1, "Maxima and minima (first taste of optimisation)", 4, "phone", "maxmin"],
+    [1, "Antiderivatives", 2, "phone", "antideriv"],
+    [1, "Definite integrals", 3, "phone", "definite"],
+    [1, "Integration by substitution", 2, "phone", "subst"],
+    [1, "Checkpoint: calculus, including interview Q1 to Q3", 1, "phone", "check1"],
+    [2, "Mean, median and quartiles", 2, "phone", "describe"],
+    [2, "Standard deviation and box plots", 2, "phone", "spread"],
+    [2, "Counting and basic probability", 2, "phone", "counting"],
+    [2, "Combining events and conditional probability", 3, "phone", "conditional"],
+    [2, "Normal distribution", 2, "phone", "normal"],
+    [2, "Binomial distribution", 2, "phone", "binomial"],
+    [2, "Sampling: the idea", 1, "phone", "sampling"],
+    [2, "Solving systems of equations", 2, "phone", "systems"],
+    [2, "Matrix multiplication", 2, "phone", "matmul"],
+    [2, "Determinants", 1, "phone", "det"],
+    [2, "Checkpoint: statistics and matrices, including interview Q4 to Q6", 1, "phone", "check2"],
+    [3, "True Digital Park case study: outline", 1, "phone", "caseOutline"],
+    [3, "True Digital Park case study: draft", 2, "phone", "caseDraft"],
+    [3, "Excel XLOOKUP", 1, "phone", "xlookup"],
+    [3, "Optimisation and Excel Solver", 2, "phone", "solver"],
+    [3, "Solver model: cheapest protein plan", 2, "phone", "meal"],
+    [3, "Bottlenecks and flow (ideas from The Goal)", 1, "phone", "bottleneck"],
+    [3, "Checkpoint: case study draft and Solver model done", 1, "phone", "check3"],
     [4, "CS50P week 0: functions and variables", 3, "laptop"],
     [4, "CS50P week 1: conditionals", 3, "laptop"],
     [4, "CS50P week 2: loops", 3, "laptop"],
@@ -201,11 +211,11 @@ nav.tabs button.on { color: var(--accent); font-weight: 700; }
   ];
   function seedTasks() {
     const out = []; let n = 0;
-    for (const [phase, title, k, mode] of SEED) for (let i = 1; i <= k; i++) { n++; out.push({ id: "s" + n, phase, title: k > 1 ? `${title} (${i} of ${k})` : title, mins: 60, mode, order: n, done: false, doneOn: null }); }
+    for (const [phase, title, k, mode, lesson] of SEED) for (let i = 1; i <= k; i++) { n++; out.push({ id: "s" + n, phase, title: k > 1 ? `${title} (${i} of ${k})` : title, mins: 60, mode, order: n, done: false, doneOn: null, ...(lesson ? { lesson } : {}) }); }
     return out;
   }
   const seedResources = () => RESOURCES.map(([phase, title, url, skill, mode], i) => ({ id: "r" + (i + 1), phase, title, url, skill, mode, status: "todo" }));
-  const EMPTY = () => ({ v: 1, ord: "2028-05-01", tasks: seedTasks(), resources: seedResources(), logs: [], weeks: {}, ideas: [], savedAt: 0 });
+  const EMPTY = () => ({ v: 1, ord: "2028-05-01", tasks: seedTasks(), resources: seedResources(), logs: [], weeks: {}, ideas: [], quiz: {}, notes: {}, meal: [0, 0, 0, 0], mealSolved: false, savedAt: 0 });
 
   function validate(o) {
     if (!o || typeof o !== "object") throw new Error("That isn't an ISE Prep export.");
@@ -226,8 +236,384 @@ nav.tabs button.on { color: var(--accent); font-weight: 700; }
     }
     for (const r of o.resources) { if (!r || !r.id || !r.title) throw new Error("A resource is missing its id or title."); if (!["todo", "doing", "done"].includes(r.status)) r.status = "todo"; }
     for (const i of o.ideas) if (!i || !i.id || typeof i.text !== "string") throw new Error("A process idea is missing its text.");
-    return { v: 1, ord: o.ord, tasks: o.tasks, resources: o.resources, logs: o.logs, weeks: o.weeks, ideas: o.ideas, savedAt: Number(o.savedAt) || 0 };
+    for (const t of o.tasks) if (t.lesson != null && typeof t.lesson !== "string") delete t.lesson;
+    const obj = x => x && typeof x === "object" && !Array.isArray(x) ? x : {};
+    const quiz = obj(o.quiz), notes = obj(o.notes);
+    for (const [k, q] of Object.entries(quiz)) if (!q || typeof q !== "object") delete quiz[k];
+    for (const [k, v] of Object.entries(notes)) if (typeof v !== "string") delete notes[k];
+    const meal = Array.isArray(o.meal) && o.meal.length === 4 ? o.meal.map(n => Math.max(0, Math.min(5, Math.round(Number(n) || 0)))) : [0, 0, 0, 0];
+    return { v: 1, ord: o.ord, tasks: o.tasks, resources: o.resources, logs: o.logs, weeks: o.weeks, ideas: o.ideas, quiz, notes, meal, mealSolved: !!o.mealSolved, savedAt: Number(o.savedAt) || 0 };
   }
+
+  // ---------- In-app lessons: short notes plus practice questions, all offline ----------
+  // Math practice is generated from a seed, so each session and each retry gets fresh numbers.
+  function mulberry(seed) { let a = seed >>> 0; return () => { a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  const hashStr = s => { let h = 2166136261; for (const c of s) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; };
+  const mkR = r => ({ int: (a, b) => a + Math.floor(r() * (b - a + 1)), pick: arr => arr[Math.floor(r() * arr.length)], nz(a, b) { let v = 0; while (v === 0) v = this.int(a, b); return v; }, shuffle(arr) { const o = [...arr]; for (let i = o.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [o[i], o[j]] = [o[j], o[i]]; } return o; } });
+  const gcd = (a, b) => { a = Math.abs(a); b = Math.abs(b); while (b) [a, b] = [b, a % b]; return a || 1; };
+  const frac = (n, d) => { if (d < 0) { n = -n; d = -d; } const g = gcd(n, d); n /= g; d /= g; return d === 1 ? String(n) : `${n}/${d}`; };
+  const mi = n => n < 0 ? "−" + Math.abs(n) : String(n);
+  const xp = p => p === 0 ? "" : p === 1 ? "x" : `x<sup>${p}</sup>`;
+  function poly(terms) {
+    let s = "";
+    terms.filter(([c]) => c !== 0).forEach(([c, p], i) => { const a = Math.abs(c); s += (i === 0 ? (c < 0 ? "−" : "") : (c < 0 ? " − " : " + ")) + (a === 1 && p !== 0 ? "" : a) + xp(p); });
+    return s || "0";
+  }
+  const C = (n, k) => { let r = 1; for (let i = 1; i <= k; i++) r = r * (n - k + i) / i; return Math.round(r); };
+  const fact = n => n <= 1 ? 1 : n * fact(n - 1);
+  const num = (q, ans, explain) => ({ type: "num", q, ans, explain });
+  const mc = (q, choices, ans, explain) => ({ type: "mc", q, choices, ans, explain });
+  const round = (v, d = 4) => Math.round(v * 10 ** d) / 10 ** d;
+
+  const LESSONS = {
+    // ===== Phase 1: calculus =====
+    functions: { title: "Functions and graphs", notes: `
+<p>A <b>function</b> takes an input x and gives one output f(x). To <b>evaluate</b> f(3), replace every x with 3.</p>
+<p><b>Straight lines:</b> y = mx + c. m is the <b>slope</b> (rise over run) and c is where the line crosses the y-axis. The slope through (x₁, y₁) and (x₂, y₂) is (y₂ − y₁) ÷ (x₂ − x₁).</p>
+<p><b>Composition:</b> f(g(x)) means do g first, then f. If f(x) = 2x + 1 and g(x) = x², then f(g(3)) = f(9) = 19.</p>
+<p><b>Solving:</b> do the same thing to both sides. 3x + 4 = 19 → 3x = 15 → x = 5.</p>
+<p class="small muted">Example: f(x) = x² − 3x + 2, so f(4) = 16 − 12 + 2 = 6.</p>`,
+      gens: [
+        R => { const a = R.int(1, 3), b = R.int(-5, 5), c = R.int(-5, 5), k = R.int(-3, 3); return num(`f(x) = ${poly([[a, 2], [b, 1], [c, 0]])}. What is f(${mi(k)})?`, a * k * k + b * k + c, `Replace x with ${mi(k)}: ${a}(${mi(k)})² ${b < 0 ? "−" : "+"} ${Math.abs(b)}(${mi(k)}) ${c < 0 ? "−" : "+"} ${Math.abs(c)} = ${a * k * k + b * k + c}.`); },
+        R => { const m = R.nz(-4, 4), x1 = R.int(-3, 3), dx = R.int(1, 4), y1 = R.int(-5, 5); return num(`What is the slope of the line through (${mi(x1)}, ${mi(y1)}) and (${mi(x1 + dx)}, ${mi(y1 + m * dx)})?`, m, `Rise ÷ run = (${mi(y1 + m * dx)} − ${mi(y1)}) ÷ (${mi(x1 + dx)} − ${mi(x1)}) = ${m * dx} ÷ ${dx} = ${m}.`); },
+        R => { const a = R.int(2, 4), b = R.int(-5, 5), k = R.int(-3, 3); return num(`f(x) = ${poly([[a, 1], [b, 0]])} and g(x) = x². What is f(g(${mi(k)}))?`, a * k * k + b, `g(${mi(k)}) = ${k * k}, then f(${k * k}) = ${a}×${k * k} ${b < 0 ? "−" : "+"} ${Math.abs(b)} = ${a * k * k + b}.`); },
+        R => { const x = R.int(-6, 6), a = R.int(2, 5), b = R.int(-9, 9); return num(`Solve ${poly([[a, 1], [b, 0]])} = ${mi(a * x + b)}. What is x?`, x, `Subtract ${mi(b)} from both sides: ${a}x = ${mi(a * x)}. Divide by ${a}: x = ${x}.`); },
+        R => { const m = R.nz(-3, 4), c = R.nz(-5, 5), k = R.pick([2, 3]); return num(`The line ${k}y = ${poly([[k * m, 1], [k * c, 0]])}. Where does it cross the y-axis (the value of c)?`, c, `Divide everything by ${k}: y = ${poly([[m, 1], [c, 0]])}, so c = ${c}.`); },
+      ] },
+    explog: { title: "Exponentials and logarithms", notes: `
+<p><b>Index laws:</b> a<sup>m</sup> × a<sup>n</sup> = a<sup>m+n</sup>, (a<sup>m</sup>)<sup>n</sup> = a<sup>mn</sup>, a<sup>0</sup> = 1, a<sup>−n</sup> = 1/a<sup>n</sup>.</p>
+<p>A <b>logarithm</b> answers "what power?": log₂ 8 = 3 because 2³ = 8. log₁₀ 1000 = 3.</p>
+<p><b>Log laws:</b> log(ab) = log a + log b, log(a/b) = log a − log b, log(a<sup>n</sup>) = n log a.</p>
+<p><b>e and ln:</b> e ≈ 2.718 and ln means log base e. ln(e<sup>k</sup>) = k and e<sup>ln k</sup> = k. They undo each other.</p>
+<p class="small muted">Example: solve 2<sup>x</sup> = 32. Since 32 = 2⁵, x = 5.</p>`,
+      gens: [
+        R => { const a = R.int(2, 9), b = R.int(2, 9); return num(`2<sup>${a}</sup> × 2<sup>${b}</sup> = 2<sup>?</sup>`, a + b, `Same base, so add the powers: ${a} + ${b} = ${a + b}.`); },
+        R => { const a = R.int(2, 5), b = R.int(2, 4); return num(`(3<sup>${a}</sup>)<sup>${b}</sup> = 3<sup>?</sup>`, a * b, `A power of a power multiplies: ${a} × ${b} = ${a * b}.`); },
+        R => { const k = R.int(2, 8); return num(`log₂ ${2 ** k} = ?`, k, `2<sup>${k}</sup> = ${2 ** k}, so the answer is ${k}.`); },
+        R => { const [b, k] = R.pick([[2, R.int(3, 7)], [3, R.int(2, 5)], [5, R.int(2, 4)]]); return num(`Solve ${b}<sup>x</sup> = ${b ** k}.`, k, `${b ** k} = ${b}<sup>${k}</sup>, so x = ${k}.`); },
+        R => { const k = R.int(2, 9); return num(`ln(e<sup>${k}</sup>) = ?`, k, `ln and e undo each other, so it's ${k}.`); },
+        R => { const a = R.int(1, 4), b = R.int(1, 4); return num(`log₂ ${2 ** a} + log₂ ${2 ** b} = ?`, a + b, `log₂ ${2 ** a} = ${a} and log₂ ${2 ** b} = ${b}, so ${a + b}. (Or: log₂ ${2 ** (a + b)}.)`); },
+      ] },
+    limits: { title: "Limits: the idea", notes: `
+<p>A <b>limit</b> asks what value f(x) gets close to as x gets close to some number. It doesn't care what happens exactly at that number.</p>
+<p><b>Usually you just substitute:</b> the limit of x² + 1 as x → 2 is 5.</p>
+<p><b>If substituting gives 0/0, simplify first:</b> (x² − 9)/(x − 3) = (x − 3)(x + 3)/(x − 3) = x + 3, so the limit as x → 3 is 6.</p>
+<p><b>As x → ∞:</b> c/x → 0. For (ax + 1)/(bx + 2), divide top and bottom by x, and the limit is a/b.</p>
+<p>Why it matters: the derivative is defined as a limit, the slope between two points as they get closer together.</p>`,
+      gens: [
+        R => { const k = R.int(-3, 4), b = R.int(-4, 4); return num(`What is the limit of ${poly([[1, 2], [b, 1]])} as x → ${mi(k)}?`, k * k + b * k, `No problem at x = ${mi(k)}, so substitute: ${k * k + b * k}.`); },
+        R => { const a = R.int(1, 6); return num(`What is the limit of (x² − ${a * a}) / (x − ${a}) as x → ${a}?`, 2 * a, `Factor: (x − ${a})(x + ${a}) / (x − ${a}) = x + ${a}. At x = ${a} that's ${2 * a}.`); },
+        R => { const c = R.int(2, 50); return num(`What is the limit of ${c}/x as x → ∞?`, 0, `Dividing ${c} by a bigger and bigger number gets closer and closer to 0.`); },
+        R => { const a = R.int(1, 6), b = R.int(2, 6); return num(`What is the limit of (${a}x + 1) / (${b}x + 2) as x → ∞? (A fraction is fine.)`, a / b, `For huge x, the +1 and +2 hardly matter, so it tends to ${a}/${b} = ${frac(a, b)}.`); },
+        () => mc("What does a limit describe?", ["The value f(x) approaches as x gets close to a number", "The largest value f(x) can take", "The value of f(x) at exactly that number, always", "Where the graph crosses the x-axis"], 0, "A limit is about the value being approached, even if f isn't defined right at that point."),
+      ] },
+    power: { title: "Derivatives and the power rule", notes: `
+<p>The <b>derivative</b> f′(x) is the slope of the graph at x: how fast f is changing.</p>
+<p><b>Power rule:</b> the derivative of x<sup>n</sup> is n·x<sup>n−1</sup>. Bring the power down, then reduce it by one.</p>
+<p>Constants multiply through: the derivative of 5x³ is 15x². The derivative of a constant is 0, and of bx it's b. Differentiate a sum term by term.</p>
+<p class="small muted">Example: f(x) = 3x⁴ − 2x + 5, so f′(x) = 12x³ − 2 and f′(1) = 10.</p>
+<p class="small muted">Questions ask for f′ at a point, so your answer is a number.</p>`,
+      gens: [
+        R => { const a = R.int(1, 5), n = R.int(2, 5), b = R.int(-6, 6), c = R.int(-5, 5), k = R.int(-2, 2); const ans = a * n * k ** (n - 1) + b; return num(`f(x) = ${poly([[a, n], [b, 1], [c, 0]])}. What is f′(${mi(k)})?`, ans, `f′(x) = ${poly([[a * n, n - 1], [b, 0]])}. At x = ${mi(k)}: ${ans}.`); },
+        R => { const n = R.int(2, 5), k = R.int(1, 3); return num(`What is the slope of y = x<sup>${n}</sup> at x = ${k}?`, n * k ** (n - 1), `dy/dx = ${n}x<sup>${n - 1}</sup>, so at x = ${k} it's ${n}×${k ** (n - 1)} = ${n * k ** (n - 1)}.`); },
+        R => { const a = R.int(2, 6), b = R.int(-9, 9), c = R.int(-9, 9), k = R.int(-3, 3); return num(`f(x) = ${poly([[a, 2], [b, 1], [c, 0]])}. What is f′(${mi(k)})?`, 2 * a * k + b, `f′(x) = ${poly([[2 * a, 1], [b, 0]])}, so f′(${mi(k)}) = ${2 * a * k + b}.`); },
+        R => { const c = R.int(2, 99); return num(`f(x) = ${c}. What is f′(x)?`, 0, "A constant doesn't change, so its slope is 0."); },
+      ] },
+    product: { title: "Product and quotient rules", notes: `
+<p><b>Product rule:</b> if f = u·v, then f′ = u′v + uv′.</p>
+<p><b>Quotient rule:</b> if f = u/v, then f′ = (u′v − uv′) / v².</p>
+<p class="small muted">Example (product): f = x²(x + 3). u = x², u′ = 2x, v = x + 3, v′ = 1. f′ = 2x(x + 3) + x². At x = 1: 8 + 1 = 9.</p>
+<p class="small muted">Example (quotient): f = x/(x + 2). f′ = (1·(x + 2) − x·1)/(x + 2)² = 2/(x + 2)². At x = 0: 2/4 = 1/2.</p>
+<p class="small muted">Fractions like 3/8 or decimals like 0.375 are both accepted.</p>`,
+      gens: [
+        R => { const a = R.int(1, 3), b = R.int(-3, 4), c = R.int(1, 3), d = R.int(-3, 4), k = R.int(0, 2); const ans = a * (c * k + d) + c * (a * k + b); return num(`f(x) = (${poly([[a, 1], [b, 0]])})(${poly([[c, 1], [d, 0]])}). What is f′(${k})?`, ans, `u′v + uv′ = ${a}(${poly([[c, 1], [d, 0]])}) + ${c}(${poly([[a, 1], [b, 0]])}). At x = ${k}: ${a}×${c * k + d} + ${c}×${a * k + b} = ${ans}.`); },
+        R => { const m = R.int(2, 3), c = R.int(1, 5), k = R.int(1, 2); const ans = m * k ** (m - 1) * (k + c) + k ** m; return num(`f(x) = x<sup>${m}</sup>(x + ${c}). What is f′(${k})?`, ans, `u = x<sup>${m}</sup>, v = x + ${c}. f′ = ${m}x<sup>${m - 1}</sup>(x + ${c}) + x<sup>${m}</sup>. At x = ${k}: ${m * k ** (m - 1) * (k + c)} + ${k ** m} = ${ans}.`); },
+        R => { const c = R.int(1, 5), k = R.int(0, 3); return num(`f(x) = x / (x + ${c}). What is f′(${k})?`, c / (k + c) ** 2, `f′ = (1·(x + ${c}) − x·1)/(x + ${c})² = ${c}/(x + ${c})². At x = ${k}: ${frac(c, (k + c) ** 2)}.`); },
+        R => { const k = R.int(1, 3); return num(`f(x) = x² / (x + 1). What is f′(${k})?`, (k * k + 2 * k) / (k + 1) ** 2, `f′ = (2x(x + 1) − x²)/(x + 1)² = (x² + 2x)/(x + 1)². At x = ${k}: ${frac(k * k + 2 * k, (k + 1) ** 2)}.`); },
+      ] },
+    chain: { title: "Chain rule", notes: `
+<p>For a function inside a function, f(g(x)): <b>differentiate the outside, keep the inside, then multiply by the derivative of the inside.</b></p>
+<p>d/dx f(g(x)) = f′(g(x)) · g′(x)</p>
+<p class="small muted">Example: (3x + 1)⁴. Outside: u⁴ → 4u³. Inside: 3x + 1 → 3. So the derivative is 4(3x + 1)³ × 3 = 12(3x + 1)³. At x = 0: 12.</p>
+<p class="small muted">√(ax + b) = (ax + b)<sup>1/2</sup>, so its derivative is a / (2√(ax + b)).</p>`,
+      gens: [
+        R => { const a = R.int(2, 3), b = R.int(-3, 3), n = R.int(2, 4), k = R.int(0, 2); const ans = n * a * (a * k + b) ** (n - 1); return num(`f(x) = (${poly([[a, 1], [b, 0]])})<sup>${n}</sup>. What is f′(${k})?`, ans, `f′ = ${n}(${poly([[a, 1], [b, 0]])})<sup>${n - 1}</sup> × ${a}. At x = ${k}: ${n}×${mi(a * k + b)}<sup>${n - 1}</sup>×${a} = ${ans}.`); },
+        R => { const s = R.int(2, 5), a = R.int(1, 4), k = R.int(0, 3), b = s * s - a * k; return num(`f(x) = √(${poly([[a, 1], [b, 0]])}). What is f′(${k})? (A fraction is fine.)`, a / (2 * s), `f′ = ${a} / (2√(${poly([[a, 1], [b, 0]])})). At x = ${k}, the root is √${s * s} = ${s}, so ${frac(a, 2 * s)}.`); },
+        R => { const n = R.int(2, 5), k = R.int(1, 2); return num(`f(x) = (x² + 1)<sup>${n}</sup>. What is f′(${k})?`, n * (k * k + 1) ** (n - 1) * 2 * k, `f′ = ${n}(x² + 1)<sup>${n - 1}</sup> × 2x. At x = ${k}: ${n}×${k * k + 1}<sup>${n - 1}</sup>×${2 * k} = ${n * (k * k + 1) ** (n - 1) * 2 * k}.`); },
+      ] },
+    special: { title: "Derivatives of eˣ, ln x, sin and cos", notes: `
+<p>Learn these four by heart:</p>
+<p>d/dx eˣ = eˣ &nbsp;·&nbsp; d/dx ln x = 1/x &nbsp;·&nbsp; d/dx sin x = cos x &nbsp;·&nbsp; d/dx cos x = −sin x</p>
+<p>With the chain rule: d/dx e<sup>kx</sup> = k·e<sup>kx</sup> and d/dx sin(kx) = k·cos(kx).</p>
+<p>Handy values: e⁰ = 1, sin 0 = 0, cos 0 = 1.</p>
+<p class="small muted">Example: f = 4e<sup>2x</sup>, so f′ = 8e<sup>2x</sup> and f′(0) = 8. Trap: d/dx ln(5x) = 5/(5x) = 1/x.</p>`,
+      gens: [
+        R => { const a = R.int(1, 5), b = R.int(2, 4); return num(`f(x) = ${a === 1 ? "" : a}e<sup>${b}x</sup>. What is f′(0)?`, a * b, `f′ = ${a * b}e<sup>${b}x</sup>, and e⁰ = 1, so ${a * b}.`); },
+        R => { const a = R.int(1, 6), k = R.int(1, 4); return num(`f(x) = ${a === 1 ? "" : a} ln x. What is f′(${k})? (A fraction is fine.)`, a / k, `f′ = ${a}/x, so ${frac(a, k)}.`); },
+        R => { const a = R.int(2, 6); return num(`f(x) = sin(${a}x). What is f′(0)?`, a, `f′ = ${a}cos(${a}x), and cos 0 = 1, so ${a}.`); },
+        R => { const a = R.int(2, 6); return num(`f(x) = ${a} cos x. What is f′(0)?`, 0, `f′ = −${a} sin x, and sin 0 = 0, so 0.`); },
+        R => { const a = R.int(2, 9), k = R.int(1, 4); return num(`f(x) = ln(${a}x). What is f′(${k})? (A fraction is fine.)`, 1 / k, `ln(${a}x) = ln ${a} + ln x, so f′ = 1/x = ${frac(1, k)}. The ${a} disappears.`); },
+        () => num("f(x) = x·eˣ. What is f′(0)?", 1, "Product rule: eˣ + x·eˣ. At 0: 1 + 0 = 1."),
+      ] },
+    maxmin: { title: "Maxima and minima", notes: `
+<p>At a maximum or minimum, the graph is flat, so <b>f′(x) = 0</b>. Solve f′(x) = 0 to find these <b>turning points</b>.</p>
+<p>To tell which is which, check the second derivative: f″ &gt; 0 means a minimum (a valley), f″ &lt; 0 means a maximum (a hill).</p>
+<p><b>This is optimisation, the heart of ISE:</b> lowest cost, highest profit, shortest time.</p>
+<p class="small muted">Example: cost C(q) = q² − 20q + 150. C′ = 2q − 20 = 0 gives q = 10, and C″ = 2 &gt; 0, so the minimum cost is C(10) = 50.</p>`,
+      gens: [
+        R => { const a = R.int(1, 3), h = R.int(-5, 5), c = R.int(-5, 9); return num(`f(x) = ${poly([[a, 2], [-2 * a * h, 1], [c, 0]])}. At which x is f smallest?`, h, `f′ = ${poly([[2 * a, 1], [-2 * a * h, 0]])} = 0 gives x = ${h}.`); },
+        R => { const h = R.int(5, 40), m = R.int(10, 200); return num(`Making q units costs C(q) = q² − ${2 * h}q + ${h * h + m} dollars. What is the lowest possible cost?`, m, `C′ = 2q − ${2 * h} = 0 gives q = ${h}. C(${h}) = ${h * h} − ${2 * h * h} + ${h * h + m} = ${m}.`); },
+        R => { const k = R.int(1, 4); return num(`f(x) = x³ − ${3 * k * k}x. At which x does it have a local maximum?`, -k, `f′ = 3x² − ${3 * k * k} = 0 gives x = ±${k}. f″ = 6x is negative at x = −${k}, so the maximum is there.`); },
+        R => { const P = 4 * R.int(3, 25); return num(`A rectangle has perimeter ${P} m. What is the largest area it can have, in m²?`, (P / 4) ** 2, `With sides x and ${P / 2} − x, area A = x(${P / 2} − x). A′ = ${P / 2} − 2x = 0 gives x = ${P / 4}: a square, area ${(P / 4) ** 2}.`); },
+        () => mc("At a maximum or minimum of a smooth curve, the derivative is…", ["Zero", "Positive", "Negative", "Undefined"], 0, "The tangent is flat at a turning point, so the slope is 0."),
+      ] },
+    antideriv: { title: "Antiderivatives", notes: `
+<p><b>Integration undoes differentiation.</b> An antiderivative of f is a function F with F′ = f.</p>
+<p><b>Reverse power rule:</b> ∫ xⁿ dx = xⁿ⁺¹/(n + 1) + C (for n ≠ −1). Raise the power by one, then divide by the new power.</p>
+<p>The <b>+ C</b> is there because constants vanish when you differentiate, so every antiderivative has an unknown constant. A starting value such as F(0) = 3 pins it down.</p>
+<p class="small muted">Example: ∫ 6x² dx = 2x³ + C. If F(0) = 1, then C = 1 and F(1) = 3.</p>`,
+      gens: [
+        R => { const n = R.int(1, 4), m = R.int(1, 5); return num(`∫ ${(n + 1) * m}x<sup>${n}</sup> dx = k·x<sup>${n + 1}</sup> + C. What is k?`, m, `Raise the power to ${n + 1} and divide by it: ${(n + 1) * m}/${n + 1} = ${m}.`); },
+        R => { const n = R.int(1, 3), m = R.int(1, 4), c = R.int(-5, 5); return num(`F′(x) = ${(n + 1) * m}x<sup>${n}</sup> and F(0) = ${mi(c)}. What is F(1)?`, m + c, `F(x) = ${m === 1 ? "" : m}x<sup>${n + 1}</sup> + C, and F(0) = C = ${mi(c)}. So F(1) = ${m} ${c < 0 ? "−" : "+"} ${Math.abs(c)} = ${m + c}.`); },
+        () => mc("Why do we add + C to an antiderivative?", ["Constants disappear when you differentiate, so any constant could have been there", "It stands for the area under the curve", "To make the answer positive", "It's only needed for e and ln"], 0, "x² + 5 and x² − 1 both have derivative 2x, so you can't tell the constant from the derivative alone."),
+      ] },
+    definite: { title: "Definite integrals", notes: `
+<p>∫ from a to b of f(x) dx = F(b) − F(a), where F is any antiderivative. The + C cancels.</p>
+<p>It measures the (signed) <b>area under the curve</b> between x = a and x = b. In ISE it's used for totals: total demand over time, or probabilities from a distribution.</p>
+<p class="small muted">Example: ∫₁² 3x² dx = [x³]₁² = 8 − 1 = 7.</p>`,
+      gens: [
+        R => { const a = R.int(1, 3), b = R.int(1, 4), c = R.int(0, 5); return num(`Work out ∫₀<sup>${b}</sup> (${poly([[2 * a, 1], [c, 0]])}) dx.`, a * b * b + c * b, `Antiderivative: ${poly([[a, 2], [c, 1]])}. At ${b}: ${a * b * b + c * b}; at 0: 0. Answer ${a * b * b + c * b}.`); },
+        R => { const b = R.int(1, 4); return num(`Work out ∫₀<sup>${b}</sup> 3x² dx.`, b ** 3, `[x³] from 0 to ${b} = ${b ** 3}.`); },
+        R => { const k = R.int(2, 9), a = R.int(0, 3), b = a + R.int(1, 5); return num(`Work out ∫<sub>${a}</sub><sup>${b}</sup> ${k} dx.`, k * (b - a), `A rectangle: height ${k} × width ${b - a} = ${k * (b - a)}.`); },
+        R => { const b = R.pick([1, 2, 3]); return num(`Work out ∫₀<sup>${b}</sup> 4x³ dx.`, b ** 4, `[x⁴] from 0 to ${b} = ${b ** 4}.`); },
+      ] },
+    subst: { title: "Integration by substitution", notes: `
+<p>Substitution is the chain rule in reverse. Look for a function and its derivative both inside the integral.</p>
+<p>Steps: pick u = the inside function, find du = u′ dx, rewrite everything in u, integrate, then change back (or change the limits).</p>
+<p class="small muted">Example: ∫₀¹ 2x(x² + 1)³ dx. Let u = x² + 1, du = 2x dx. The limits become u = 1 to 2. ∫₁² u³ du = [u⁴/4]₁² = 4 − 1/4 = 15/4.</p>`,
+      gens: [
+        R => { const n = R.int(1, 3); return num(`Work out ∫₀¹ 2x(x² + 1)<sup>${n}</sup> dx. (A fraction is fine.)`, (2 ** (n + 1) - 1) / (n + 1), `u = x² + 1, du = 2x dx, u goes from 1 to 2. ∫₁² u<sup>${n}</sup> du = (2<sup>${n + 1}</sup> − 1)/${n + 1} = ${frac(2 ** (n + 1) - 1, n + 1)}.`); },
+        R => { const n = R.int(1, 3); return num(`Work out ∫₀¹ 3x²(x³ + 1)<sup>${n}</sup> dx. (A fraction is fine.)`, (2 ** (n + 1) - 1) / (n + 1), `u = x³ + 1, du = 3x² dx, u goes from 1 to 2. Same as ∫₁² u<sup>${n}</sup> du = ${frac(2 ** (n + 1) - 1, n + 1)}.`); },
+        R => { const a = R.int(1, 2); return num(`Work out ∫₀¹ ${a === 1 ? "" : a}e<sup>${a === 1 ? "" : a}x</sup> dx, to 2 decimal places.`, Math.E ** a - 1, `u = ${a}x gives [e<sup>${a}x</sup>]₀¹ = e<sup>${a}</sup> − 1 ≈ ${(Math.E ** a - 1).toFixed(2)}.`); },
+        () => mc("For ∫ 2x·cos(x²) dx, the best substitution is u = …", ["x²", "2x", "cos(x²)", "cos x"], 0, "x² is the inside function, and its derivative 2x is right there."),
+      ] },
+    check1: { title: "Checkpoint: calculus", mix: ["power", "product", "chain", "special", "maxmin", "definite", "subst"], count: 8, notes: `
+<p>Eight mixed questions from the whole phase, plus the interview questions you couldn't do in November. Score 80% or more to pass the checkpoint.</p>
+<p class="small muted">Then try Khan Academy's Calculus 1 course challenge after ORD for a second opinion.</p>`,
+      fixed: [
+        () => num("Interview Q1: differentiate y = x³ − 4x + 2 and give dy/dx at x = 2.", 8, "dy/dx = 3x² − 4. At x = 2: 12 − 4 = 8."),
+        () => num("Interview Q2: y = x·e<sup>2x</sup>. What is dy/dx at x = 0?", 1, "Product rule: e<sup>2x</sup> + 2x·e<sup>2x</sup> = e<sup>2x</sup>(1 + 2x). At 0: 1."),
+        () => num("Interview Q3: work out ∫₀² (2x + 3) dx.", 10, "[x² + 3x]₀² = 4 + 6 = 10."),
+      ] },
+
+    // ===== Phase 2: statistics and matrices =====
+    describe: { title: "Mean, median and quartiles", notes: `
+<p><b>Mean:</b> add everything up and divide by how many there are. <b>Median:</b> the middle value once sorted (with an even count, the average of the middle two). <b>Mode:</b> the most common value. <b>Range:</b> largest minus smallest.</p>
+<p><b>Quartiles</b> split sorted data into four quarters. Q1 is the 25th percentile and Q3 the 75th. The <b>interquartile range</b> (IQR) = Q3 − Q1 is the spread of the middle half.</p>
+<p>Use the <b>median</b> when outliers would drag the mean, like salaries or HDB prices.</p>`,
+      gens: [
+        R => { const xs = Array.from({ length: 7 }, () => R.int(1, 20)); const s = xs.reduce((a, b) => a + b, 0); return num(`Find the mean of ${xs.join(", ")}. (Up to 2 decimal places.)`, s / 7, `Sum = ${s}, divided by 7 = ${round(s / 7, 2)}.`); },
+        R => { const xs = Array.from({ length: 7 }, () => R.int(1, 30)); const s = [...xs].sort((a, b) => a - b); return num(`Find the median of ${xs.join(", ")}.`, s[3], `Sorted: ${s.join(", ")}. The middle (4th) value is ${s[3]}.`); },
+        R => { const xs = Array.from({ length: 6 }, () => R.int(1, 30)); const s = [...xs].sort((a, b) => a - b); return num(`Find the median of ${xs.join(", ")}.`, (s[2] + s[3]) / 2, `Sorted: ${s.join(", ")}. Even count, so average the 3rd and 4th: (${s[2]} + ${s[3]}) / 2 = ${(s[2] + s[3]) / 2}.`); },
+        R => { const xs = Array.from({ length: 6 }, () => R.int(2, 40)); const s = [...xs].sort((a, b) => a - b); return num(`Find the range of ${xs.join(", ")}.`, s[5] - s[0], `${s[5]} − ${s[0]} = ${s[5] - s[0]}.`); },
+        R => { const q1 = R.int(10, 40), q3 = q1 + R.int(5, 30); return num(`Q1 = ${q1} and Q3 = ${q3}. What is the interquartile range?`, q3 - q1, `IQR = Q3 − Q1 = ${q3 - q1}.`); },
+        () => mc("Five people earn $3,000 a month and one earns $100,000. Which is the better 'typical' salary?", ["The median", "The mean", "The range", "The mode is always best"], 0, "The one huge salary drags the mean up. The median ($3,000) stays typical."),
+      ] },
+    spread: { title: "Standard deviation and box plots", notes: `
+<p><b>Standard deviation</b> (SD) measures how far values typically are from the mean. To compute it: find each value's distance from the mean, square those, average them (that's the <b>variance</b>), then take the square root.</p>
+<p>Adding a constant to every value doesn't change the SD. Multiplying every value by k multiplies the SD by k.</p>
+<p>A <b>box plot</b> shows the minimum, Q1, median, Q3 and maximum. The box spans Q1 to Q3 (the IQR).</p>
+<p class="small muted">Example: 2, 4, 4, 4, 5, 5, 7, 9 has mean 5, variance 4 and SD 2.</p>`,
+      gens: [
+        R => { const sh = R.int(1, 20); const xs = [2, 4, 4, 4, 5, 5, 7, 9].map(v => v + sh); return num(`Find the (population) SD of ${xs.join(", ")}.`, 2, `It's 2, 4, 4, 4, 5, 5, 7, 9 with ${sh} added to each, and adding a constant doesn't change the spread. SD = 2.`); },
+        R => { const m = R.int(2, 5); const xs = [2, 4, 4, 4, 5, 5, 7, 9].map(v => v * m); return num(`Find the (population) SD of ${xs.join(", ")}.`, 2 * m, `It's 2, 4, 4, 4, 5, 5, 7, 9 (SD 2) multiplied by ${m}, so SD = ${2 * m}.`); },
+        R => { const sd = R.int(2, 9); return num(`The SD of some data is ${sd}. What is the variance?`, sd * sd, `Variance = SD² = ${sd * sd}.`); },
+        () => mc("In a box plot, the box itself spans…", ["Q1 to Q3", "The minimum to the maximum", "The mean ± 1 SD", "The median to the maximum"], 0, "The box is the middle half of the data, Q1 to Q3."),
+        () => mc("Every value in a dataset is increased by 10. The standard deviation…", ["Stays the same", "Increases by 10", "Doubles", "Becomes 0"], 0, "Shifting everything moves the mean too, so distances from the mean are unchanged."),
+      ] },
+    counting: { title: "Counting and basic probability", notes: `
+<p>For equally likely outcomes: <b>P(event) = favourable outcomes ÷ total outcomes</b>.</p>
+<p>Two dice have 6 × 6 = 36 outcomes. n distinct things can be ordered in <b>n!</b> ways (4! = 24).</p>
+<p><b>Combinations</b>, "choose r from n" when order doesn't matter: C(n, r) = n! / (r!(n − r)!). For example, C(5, 2) = 10.</p>
+<p><b>"At least one" trick:</b> P(at least one) = 1 − P(none).</p>`,
+      gens: [
+        R => { const s = R.int(2, 12); let c = 0; for (let a = 1; a <= 6; a++) for (let b = 1; b <= 6; b++) if (a + b === s) c++; return num(`Two fair dice are rolled. What is the probability that the total is ${s}? (A fraction is fine.)`, c / 36, `${c} of the 36 outcomes give ${s}, so ${frac(c, 36)}.`); },
+        R => { const n = R.int(2, 5); return num(`A fair coin is flipped ${n} times. What is the probability of at least one head? (A fraction is fine.)`, 1 - 1 / 2 ** n, `P(no heads) = 1/${2 ** n}, so P(at least one) = 1 − 1/${2 ** n} = ${frac(2 ** n - 1, 2 ** n)}.`); },
+        R => { const n = R.int(3, 6); return num(`In how many orders can ${n} different books go on a shelf?`, fact(n), `${n}! = ${fact(n)}.`); },
+        R => { const n = R.int(4, 10), r = R.int(2, 3); return num(`How many ways can you choose ${r} people from ${n}, if order doesn't matter?`, C(n, r), `C(${n}, ${r}) = ${C(n, r)}.`); },
+        R => { const r = R.int(1, 9), b = R.int(1, 9); return num(`A bag has ${r} red and ${b} blue balls. One is picked at random. What is P(red)? (A fraction is fine.)`, r / (r + b), `${r} out of ${r + b} = ${frac(r, r + b)}.`); },
+      ] },
+    conditional: { title: "Combining events and conditional probability", notes: `
+<p><b>Independent events</b> (one doesn't affect the other): P(A and B) = P(A) × P(B).</p>
+<p><b>Or:</b> P(A or B) = P(A) + P(B) − P(A and B). The subtraction stops you counting the overlap twice.</p>
+<p><b>Not:</b> P(not A) = 1 − P(A).</p>
+<p><b>Conditional:</b> P(A | B), "A given B", = P(A and B) / P(B). With a table of counts, restrict to the B row or column, then divide.</p>
+<p class="small muted">Example: machine Y made 40 parts, and 6 were defective. P(defective | Y) = 6/40 = 0.15.</p>`,
+      gens: [
+        R => { const p = R.int(1, 9) / 10, q = R.int(1, 9) / 10; return num(`A and B are independent, with P(A) = ${p} and P(B) = ${q}. What is P(A and B)?`, p * q, `${p} × ${q} = ${round(p * q)}.`); },
+        R => { const p = R.int(1, 9) / 10, q = R.int(1, 9) / 10; return num(`A and B are independent, with P(A) = ${p} and P(B) = ${q}. What is P(A or B)?`, p + q - p * q, `${p} + ${q} − ${p}×${q} = ${round(p + q - p * q)}.`); },
+        R => { const g1 = R.int(20, 60), d1 = R.int(1, 10), g2 = R.int(20, 60), d2 = R.int(1, 10); return num(`Machine X made ${g1} good and ${d1} defective parts. Machine Y made ${g2} good and ${d2} defective. A part from Y is picked. What is P(defective)? (A fraction is fine.)`, d2 / (g2 + d2), `Only look at Y: ${d2} defective out of ${g2 + d2} = ${frac(d2, g2 + d2)}.`); },
+        R => { const g1 = R.int(20, 60), d1 = R.int(1, 10), g2 = R.int(20, 60), d2 = R.int(1, 10); return num(`Machine X made ${g1} good and ${d1} defective parts. Machine Y made ${g2} good and ${d2} defective. A defective part is picked. What is P(it came from Y)? (A fraction is fine.)`, d2 / (d1 + d2), `Only look at defective parts: ${d2} of ${d1 + d2} came from Y, so ${frac(d2, d1 + d2)}.`); },
+        R => { const p = R.int(1, 99) / 100; return num(`P(rain) = ${p}. What is P(no rain)?`, 1 - p, `1 − ${p} = ${round(1 - p, 2)}.`); },
+      ] },
+    normal: { title: "The normal distribution", notes: `
+<p>The <b>normal distribution</b> is the bell curve: symmetric around the mean μ, with its spread set by the SD σ.</p>
+<p><b>68–95–99.7 rule:</b> about 68% of values lie within 1σ of the mean, 95% within 2σ, and 99.7% within 3σ.</p>
+<p>A <b>z-score</b> says how many SDs a value is from the mean: z = (x − μ) / σ.</p>
+<p class="small muted">Example: IPPT 2.4 km times with mean 12 min and SD 1 min. About 95% of runners take between 10 and 14 minutes.</p>`,
+      gens: [
+        R => { const mu = R.int(50, 100), s = R.int(2, 10), k = R.pick([1, 2, 3]); return num(`Data are normal with mean ${mu} and SD ${s}. Roughly what percentage lies between ${mu - k * s} and ${mu + k * s}?`, [68, 95, 99.7][k - 1], `That's within ${k} SD of the mean: about ${[68, 95, 99.7][k - 1]}%.`); },
+        R => { const mu = R.int(50, 100), s = R.int(2, 10); return num(`Data are normal with mean ${mu} and SD ${s}. Roughly what percentage is above ${mu + 2 * s}?`, 2.5, `95% is within 2 SD, so 5% is outside, split equally between the two tails: 2.5%.`); },
+        R => { const mu = R.int(40, 90), s = R.int(2, 10), z = R.pick([-2, -1, 1, 2, 3]); return num(`Mean ${mu}, SD ${s}. What is the z-score of ${mu + z * s}?`, z, `(${mu + z * s} − ${mu}) / ${s} = ${z}.`); },
+        () => mc("Which is true of a normal distribution?", ["Mean, median and mode are equal", "It is skewed to the right", "Half the data lies within 1 SD of the mean", "It can't have negative values"], 0, "It's symmetric, so its centre is the mean, the median and the mode."),
+      ] },
+    binomial: { title: "The binomial distribution", notes: `
+<p>Use the <b>binomial distribution</b> when you repeat n independent trials, each with the same chance p of "success", and count the successes X.</p>
+<p>P(X = k) = C(n, k) · p<sup>k</sup> · (1 − p)<sup>n−k</sup></p>
+<p><b>Mean</b> = np. <b>Variance</b> = np(1 − p).</p>
+<p class="small muted">Example: 10% of parts are faulty and you check 3. P(none faulty) = 0.9³ = 0.729.</p>`,
+      gens: [
+        R => { const n = R.int(3, 6), k = R.int(0, n); return num(`A fair coin is flipped ${n} times. What is P(exactly ${k} heads)? (A fraction is fine.)`, C(n, k) / 2 ** n, `C(${n}, ${k}) / 2<sup>${n}</sup> = ${C(n, k)}/${2 ** n} = ${frac(C(n, k), 2 ** n)}.`); },
+        R => { const n = R.pick([10, 20, 40, 50]), p = R.pick([0.1, 0.2, 0.3, 0.5]); return num(`X is binomial with n = ${n} and p = ${p}. What is the mean?`, n * p, `np = ${n} × ${p} = ${round(n * p)}.`); },
+        R => { const n = R.pick([10, 20, 50, 100]), p = R.pick([0.1, 0.2, 0.5]); return num(`X is binomial with n = ${n} and p = ${p}. What is the variance?`, n * p * (1 - p), `np(1 − p) = ${n} × ${p} × ${round(1 - p)} = ${round(n * p * (1 - p))}.`); },
+        R => { const n = R.int(2, 4), p = R.pick([0.1, 0.2]); return num(`${Math.round(p * 100)}% of parts are faulty. You check ${n} at random. What is P(none faulty)? (Up to 4 decimal places.)`, (1 - p) ** n, `${round(1 - p)}<sup>${n}</sup> = ${round((1 - p) ** n)}.`); },
+      ] },
+    sampling: { title: "Sampling: the idea", notes: `
+<p>We usually can't measure everyone (the <b>population</b>), so we measure a <b>sample</b> and use it to estimate.</p>
+<p><b>Random sampling</b> avoids bias. Asking only your own section about cookhouse food doesn't represent the whole camp.</p>
+<p>Bigger samples give steadier estimates. The <b>standard error</b> of a sample mean is σ / √n, so quadrupling n halves the error.</p>`,
+      gens: [
+        R => { const s = R.int(2, 20), n = R.pick([4, 9, 16, 25, 100]); return num(`The population SD is ${s}, and you take a sample of ${n}. What is the standard error of the mean?`, s / Math.sqrt(n), `σ / √n = ${s} / ${Math.sqrt(n)} = ${round(s / Math.sqrt(n))}.`); },
+        () => mc("To estimate how many hours a week NSFs study, which sample is best?", ["A random sample from all units", "Your own bunk", "Volunteers who reply to a poll", "People at the library"], 0, "The others are biased towards particular kinds of people."),
+        () => mc("If you make a sample 4 times bigger, the standard error…", ["Halves", "Quarters", "Doubles", "Stays the same"], 0, "SE = σ/√n, and √4 = 2."),
+      ] },
+    systems: { title: "Solving systems of equations", notes: `
+<p>Two equations in x and y are two lines, and the solution is where they cross.</p>
+<p><b>Elimination:</b> add or subtract the equations (after scaling one if needed) so one variable cancels.</p>
+<p class="small muted">Example: 2x + y = 5 and x − y = 1. Adding gives 3x = 6, so x = 2, then y = 1.</p>
+<p>Parallel lines (same slope, different intercept) never cross, so there's no solution.</p>`,
+      gens: [
+        R => { let a, b, c, d; do { a = R.nz(-3, 4); b = R.nz(-3, 4); c = R.nz(-3, 4); d = R.nz(-3, 4); } while (a * d - b * c === 0); const x = R.int(-5, 5), y = R.int(-5, 5); return num(`Solve ${poly([[a, 1]])} ${b < 0 ? "−" : "+"} ${Math.abs(b) === 1 ? "" : Math.abs(b)}y = ${mi(a * x + b * y)} and ${poly([[c, 1]])} ${d < 0 ? "−" : "+"} ${Math.abs(d) === 1 ? "" : Math.abs(d)}y = ${mi(c * x + d * y)}. What is x?`, x, `Eliminating y gives x = ${x} (and y = ${y}). Check: ${a}×${mi(x)} + ${b}×${mi(y)} = ${a * x + b * y}.`); },
+        R => { let a, b, c, d; do { a = R.nz(-3, 4); b = R.nz(-3, 4); c = R.nz(-3, 4); d = R.nz(-3, 4); } while (a * d - b * c === 0); const x = R.int(-5, 5), y = R.int(-5, 5); return num(`Solve ${poly([[a, 1]])} ${b < 0 ? "−" : "+"} ${Math.abs(b) === 1 ? "" : Math.abs(b)}y = ${mi(a * x + b * y)} and ${poly([[c, 1]])} ${d < 0 ? "−" : "+"} ${Math.abs(d) === 1 ? "" : Math.abs(d)}y = ${mi(c * x + d * y)}. What is y?`, y, `Eliminating x gives y = ${y} (and x = ${x}).`); },
+        () => mc("y = 2x + 1 and y = 2x + 5. How many solutions are there?", ["None", "One", "Two", "Infinitely many"], 0, "Same slope, different intercepts: the lines are parallel and never meet."),
+      ] },
+    matmul: { title: "Matrix multiplication", notes: `
+<p>A matrix is a grid of numbers. An m×n matrix has m rows and n columns.</p>
+<p>To multiply A × B, entry (i, j) is <b>row i of A dotted with column j of B</b>: multiply matching entries, then add.</p>
+<p>You can only multiply when A's columns equal B's rows: (m×n)(n×p) gives m×p. Order matters, so AB usually isn't BA.</p>
+<p class="small muted">Example: [[1, 2], [3, 4]] × [[5, 6], [7, 8]]. Entry (1, 1) = 1×5 + 2×7 = 19.</p>`,
+      gens: [
+        R => { const A = [[R.int(-2, 4), R.int(-2, 4)], [R.int(-2, 4), R.int(-2, 4)]], B = [[R.int(-2, 4), R.int(-2, 4)], [R.int(-2, 4), R.int(-2, 4)]], i = R.int(0, 1), j = R.int(0, 1); const v = A[i][0] * B[0][j] + A[i][1] * B[1][j]; return num(`A = [[${A[0].join(", ")}], [${A[1].join(", ")}]] and B = [[${B[0].join(", ")}], [${B[1].join(", ")}]]. What is entry (row ${i + 1}, column ${j + 1}) of AB?`, v, `Row ${i + 1} of A · column ${j + 1} of B = ${A[i][0]}×${B[0][j]} + ${A[i][1]}×${B[1][j]} = ${v}.`); },
+        R => { const A = [[R.int(-2, 4), R.int(-2, 4)], [R.int(-2, 4), R.int(-2, 4)]], x = R.int(-3, 3), y = R.int(-3, 3); return num(`A = [[${A[0].join(", ")}], [${A[1].join(", ")}]] and v = [${x}, ${y}] (a column). What is the first entry of Av?`, A[0][0] * x + A[0][1] * y, `${A[0][0]}×${mi(x)} + ${A[0][1]}×${mi(y)} = ${A[0][0] * x + A[0][1] * y}.`); },
+        R => { const m = R.int(2, 4), n = R.int(2, 4), p = R.int(2, 5); const right = `${m}×${p}`, wrong = [`${p}×${m}`, `${n}×${n}`, `${m}×${n}`, `${n}×${p}`, `${m + 1}×${p}`, `${m}×${p + 1}`].filter((v, i, a) => v !== right && a.indexOf(v) === i).slice(0, 3); const ch = R.shuffle([right, ...wrong]); return mc(`A is ${m}×${n} and B is ${n}×${p}. What size is AB?`, ch, ch.indexOf(right), `(${m}×${n})(${n}×${p}): the inner ${n}s match, and the outer numbers give ${m}×${p}.`); },
+      ] },
+    det: { title: "Determinants", notes: `
+<p>For a 2×2 matrix [[a, b], [c, d]], the <b>determinant</b> is ad − bc.</p>
+<p>If the determinant is 0, the matrix has no inverse, and the matching system of equations has no unique solution (the lines are parallel or the same line).</p>
+<p class="small muted">Example: [[2, 1], [1, −1]] has determinant 2×(−1) − 1×1 = −3, so 2x + y = 5, x − y = 1 has exactly one solution.</p>`,
+      gens: [
+        R => { const a = R.int(-5, 6), b = R.int(-5, 6), c = R.int(-5, 6), d = R.int(-5, 6); return num(`What is the determinant of [[${a}, ${b}], [${c}, ${d}]]?`, a * d - b * c, `ad − bc = ${a}×${mi(d)} − ${b}×${mi(c)} = ${a * d - b * c}.`); },
+        R => { const c = R.int(1, 3), a = R.int(1, 6), d = c * R.int(1, 4); return num(`For which k is the determinant of [[${a}, k], [${c}, ${d}]] zero?`, a * d / c, `${a}×${d} − ${c}k = 0, so k = ${a * d}/${c} = ${a * d / c}.`); },
+        () => mc("A system's matrix has determinant 0. The system has…", ["No unique solution", "Exactly one solution", "Exactly two solutions", "Only negative solutions"], 0, "Determinant 0 means the lines are parallel or identical."),
+      ] },
+    check2: { title: "Checkpoint: statistics and matrices", mix: ["describe", "spread", "counting", "conditional", "normal", "binomial", "systems", "matmul", "det"], count: 8, notes: `<p>Eight mixed questions, plus the interview questions from November. Score 80% or more to pass.</p>`,
+      fixed: [
+        () => num("Interview Q4: solve 2x + y = 5 and x − y = 1. What is x?", 2, "Add them: 3x = 6, so x = 2 (and y = 1)."),
+        () => num("Interview Q5: two fair dice. P(total = 7)? (A fraction is fine.)", 1 / 6, "6 of the 36 pairs make 7, so 1/6."),
+        () => mc("Interview Q6: the median is…", ["The middle value of the sorted data", "The 25th to 75th percentile range", "The most common value", "The average"], 0, "The 25th to 75th range is the IQR. The median is the 50th percentile."),
+      ] },
+
+    // ===== Phase 3: your story and Solver =====
+    caseOutline: { title: "Case study: outline", activity: "outline", notes: `
+<p>Turn your True Digital Park internship into a one-page case study. Interviewers and scholarship panels love a concrete before-and-after.</p>
+<p>Write a line or two under each heading. Use numbers wherever you can: minutes saved, errors avoided, people trained.</p>` },
+    caseDraft: { title: "Case study: draft", activity: "draft", notes: `
+<p>Turn your outline into paragraphs: about 250 to 400 words in total. Lead with the result.</p>
+<p class="small muted">Shape: "At True Digital Park I [result, with a number]. The problem was… I mapped the process and… The SOP I wrote… Next time I would…"</p>` },
+    xlookup: { title: "Excel XLOOKUP", notes: `
+<p><b>XLOOKUP</b> finds a value in one column and returns the matching value from another:</p>
+<p><code>=XLOOKUP(what, look_in, return_from, [if_not_found])</code></p>
+<p class="small muted">Example: =XLOOKUP(103, A2:A6, C2:C6) looks for 103 in A2:A6 and returns the price in the same row of C.</p>
+<p>If nothing matches, it shows #N/A unless you give the 4th argument (for example, "Not found").</p>
+<p>The older <b>VLOOKUP(what, table, col_number, FALSE)</b> only looks right, and breaks if you insert columns. Prefer XLOOKUP.</p>`,
+      gens: [
+        R => { const items = R.shuffle(["Bolt", "Nut", "Washer", "Gear", "Belt", "Valve", "Sensor"]).slice(0, 5); const prices = items.map(() => R.int(2, 60)); const pick = R.int(0, 4); const rows = items.map((it, i) => `<tr><td>${101 + i}</td><td>${it}</td><td>${prices[i]}</td></tr>`).join(""); return num(`<table class="xl"><tr><th>A: ID</th><th>B: Item</th><th>C: Price</th></tr>${rows}</table>The IDs are in A2:A6 and the prices in C2:C6. What does =XLOOKUP(${101 + pick}, A2:A6, C2:C6) return?`, prices[pick], `${101 + pick} is in row ${pick + 2}, and its price is ${prices[pick]}.`); },
+        () => mc("=XLOOKUP(999, A2:A6, C2:C6) and 999 isn't in A2:A6. What do you see?", ["#N/A", "0", "The last price", "999"], 0, "With no 4th argument, a miss shows #N/A."),
+        () => mc("In =VLOOKUP(103, A2:C6, 3, FALSE), what does the 3 mean?", ["Return from the 3rd column of the table", "Look in the 3rd row", "Round to 3 decimals", "Find the 3rd match"], 0, "VLOOKUP counts columns from the left of the table range."),
+        () => mc("Which argument would show 'Not found' instead of #N/A?", ["The 4th argument of XLOOKUP", "The 2nd argument", "Wrapping it in SUM()", "Sorting the column"], 0, "=XLOOKUP(x, A:A, C:C, \"Not found\")."),
+      ] },
+    solver: { title: "Optimisation and Excel Solver", notes: `
+<p><b>Linear programming</b> (LP) is choosing amounts to get the best result within limits. Every model has three parts:</p>
+<p>1. <b>Decision variables:</b> what you choose (x chairs, y tables). 2. <b>Objective:</b> what you maximise or minimise (profit = 30x + 50y). 3. <b>Constraints:</b> the limits (wood: 2x + 4y ≤ 40).</p>
+<p>The best answer always sits at a <b>corner</b> of the feasible region, the area allowed by all the constraints. For two variables, check the corners. Excel <b>Solver</b> (and later PuLP in Python) does this search for you on big problems, and it's the core tool of IE2110.</p>
+<p class="small muted">In Solver: set the Objective cell, choose Max or Min, set the "By changing" cells to your variables, add constraints, choose Simplex LP, then Solve.</p>`,
+      gens: [
+        R => {
+          let a1, b1, a2, b2; do { a1 = R.int(1, 4); b1 = R.int(1, 4); a2 = R.int(1, 4); b2 = R.int(1, 4); } while (a1 * b2 === a2 * b1);
+          const xs = R.int(2, 8), ys = R.int(2, 8), p1 = R.int(2, 9) * 5, p2 = R.int(2, 9) * 5, R1 = a1 * xs + b1 * ys, R2 = a2 * xs + b2 * ys;
+          const corners = [[0, 0], [Math.min(R1 / a1, R2 / a2), 0], [0, Math.min(R1 / b1, R2 / b2)], [xs, ys]].filter(([x, y]) => a1 * x + b1 * y <= R1 + 1e-9 && a2 * x + b2 * y <= R2 + 1e-9);
+          let best = corners[0], bv = -1; for (const c of corners) { const v = p1 * c[0] + p2 * c[1]; if (v > bv) { bv = v; best = c; } }
+          return num(`You make chairs (x) and tables (y). Profit: $${p1} per chair, $${p2} per table. Wood: ${a1}x + ${b1}y ≤ ${R1}. Labour hours: ${a2}x + ${b2}y ≤ ${R2}. What is the maximum profit, in dollars? (Fractions of furniture are allowed.)`, bv, `Check the corners: ${corners.map(([x, y]) => `(${round(x, 2)}, ${round(y, 2)}) → $${round(p1 * x + p2 * y, 2)}`).join("; ")}. The best is $${round(bv, 2)} at (${round(best[0], 2)}, ${round(best[1], 2)}).`);
+        },
+        () => mc("In Solver, the cell you maximise or minimise is the…", ["Objective", "Constraint", "Variable cell", "Feasible region"], 0, "The objective is the target, such as profit or cost."),
+        () => mc("In an LP with two variables, where is the best solution?", ["At a corner of the feasible region", "Always at (0, 0)", "In the exact middle of the region", "Outside the region"], 0, "With linear objectives and constraints, the optimum is at a vertex."),
+        () => mc("Which of these is a constraint?", ["Overtime hours ≤ 10", "Maximise profit", "x = number of shifts", "Total cost"], 0, "A constraint limits what's allowed."),
+      ] },
+    meal: { title: "Solver model: cheapest protein", activity: "meal", notes: `
+<p>Your first optimisation model. Choose whole servings of each food to get <b>at least 60 g of protein a day at the lowest cost</b>.</p>
+<p>Decision variables: servings of each food (0 to 5). Objective: minimise cost. Constraint: protein ≥ 60 g. Try combinations below. The app tells you when you've found the cheapest one.</p>
+<p class="small muted">Later, in Phase 4, you'll rebuild this in Excel Solver and in Python with PuLP.</p>` },
+    bottleneck: { title: "Bottlenecks and flow (ideas from The Goal)", notes: `
+<p>Eliyahu Goldratt's novel <i>The Goal</i> teaches the <b>Theory of Constraints</b>. Here are its key ideas, in brief.</p>
+<p><b>1.</b> A process can only go as fast as its slowest step, the <b>bottleneck</b>. <b>2.</b> Speeding up any other step doesn't raise output. It just builds piles of work in progress. <b>3.</b> An hour lost at the bottleneck is an hour lost for the whole system. <b>4.</b> Find the bottleneck, make the most of it, make everything else serve it, then add capacity there.</p>
+<p><b>Little's Law:</b> work in progress = throughput × time in the system (L = λW). With 30 people queuing and 3 people served a minute, each waits about 10 minutes.</p>
+<p class="small muted">Look for these in NS: the cookhouse line, the armskote, medical centre queues.</p>`,
+      gens: [
+        R => { const r = [R.int(10, 40), R.int(10, 40), R.int(10, 40)]; const m = Math.min(...r); return num(`A 3-step process handles ${r[0]}, ${r[1]} and ${r[2]} items per hour at each step. What is its output per hour?`, m, `Output is set by the slowest step: ${m} per hour.`); },
+        R => { const r = R.shuffle([R.int(30, 40), R.int(15, 22), R.int(45, 60)]); const names = ["Collect", "Inspect", "Pack"]; const i = r.indexOf(Math.min(...r)); return mc(`Steps: ${names.map((n, k) => `${n} ${r[k]}/h`).join(", ")}. Which step should you improve first?`, names, i, `${names[i]} is the slowest (${r[i]}/h), so it's the bottleneck. Improving the others won't raise output.`); },
+        R => { const lam = R.int(2, 6), W = R.int(3, 15); return num(`On average ${lam} people a minute are served at the cookhouse, and ${lam * W} people are in the queue. How many minutes does each person wait?`, W, `Little's Law: W = L / λ = ${lam * W} / ${lam} = ${W} minutes.`); },
+        () => mc("You speed up a step that isn't the bottleneck. What happens?", ["Output stays the same and work piles up before the bottleneck", "Output rises by the same amount", "The bottleneck disappears", "Quality improves automatically"], 0, "The system still moves at the bottleneck's pace."),
+      ] },
+    check3: { title: "Checkpoint: case study and Solver", activity: "check3", notes: `<p>This checkpoint is passed when your case study draft has at least 150 words and you've found the cheapest protein plan. Check both below.</p>` },
+  };
+  // The cheapest protein puzzle: four foods, whole servings 0 to 5, at least 60 g protein.
+  const FOODS = [
+    { id: "egg", name: "2 eggs", cost: 0.8, protein: 12 },
+    { id: "chicken", name: "Chicken breast, 100 g", cost: 2.2, protein: 31 },
+    { id: "tofu", name: "Firm tofu, 150 g", cost: 1.0, protein: 12 },
+    { id: "milk", name: "Milk, 250 ml", cost: 0.9, protein: 8 },
+  ];
+  const MEAL_TARGET = 60;
+  const mealCost = q => round(FOODS.reduce((n, f, i) => n + f.cost * (q[i] || 0), 0), 2);
+  const mealProtein = q => FOODS.reduce((n, f, i) => n + f.protein * (q[i] || 0), 0);
+  const MEAL_BEST = (() => { let best = Infinity; for (let a = 0; a <= 5; a++) for (let b = 0; b <= 5; b++) for (let c = 0; c <= 5; c++) for (let d = 0; d <= 5; d++) { const q = [a, b, c, d]; if (mealProtein(q) >= MEAL_TARGET) best = Math.min(best, mealCost(q)); } return best; })();
+  const OUTLINE = [["situation", "Situation: where you were and what the team did"], ["problem", "Problem: what was slow, messy or error-prone"], ["action", "What you did: how you mapped the process and wrote the SOP"], ["result", "Result: what changed, with numbers if you have them"], ["next", "Next time: what you'd improve or measure"]];
+  const words = s => (String(s || "").trim().match(/\S+/g) || []).length;
+
+  // Builds the practice questions for one session. Same task and attempt number = same questions.
+  function lessonQuestions(key, seed) {
+    const L = LESSONS[key]; if (!L || L.activity) return [];
+    const R = mkR(mulberry(seed));
+    if (L.mix) {
+      const qs = (L.fixed || []).map(g => g(R));
+      const pool = R.shuffle(L.mix.flatMap(k => LESSONS[k].gens));
+      for (let i = 0; i < L.count; i++) qs.push(pool[i % pool.length](R));
+      return qs;
+    }
+    const order = R.shuffle(L.gens), n = L.count || 5, qs = [];
+    for (let i = 0; i < n; i++) qs.push(order[i % order.length](R));
+    return qs;
+  }
+  // Accepts 3, -2.5, 1/6, 0.1667. Close enough = within 0.01, or 0.5% for big numbers.
+  function checkNum(input, ans) {
+    const s = String(input).trim().replace(/−/g, "-").replace(/,/g, "");
+    let v;
+    const m = s.match(/^(-?\d+(?:\.\d+)?)\s*\/\s*(-?\d+(?:\.\d+)?)$/);
+    if (m) v = Number(m[1]) / Number(m[2]); else if (/^-?\d*\.?\d+$/.test(s)) v = Number(s); else return null;
+    if (!isFinite(v)) return null;
+    return Math.abs(v - ans) <= Math.max(0.01, Math.abs(ans) * 0.005);
+  }
+  const showAns = a => { const r = round(a, 4); if (Number.isInteger(round(a, 9))) return String(r); for (let d = 2; d <= 64; d++) { const n = Math.round(a * d); if (Math.abs(n / d - a) < 1e-9 && d > 1 && Math.abs(n) < 1000) return `${frac(n, d)} (${r})`; } return String(r); };
 
   // ---------- Planner: pure functions, no saving ----------
   const byPlan = (a, b) => a.phase - b.phase || a.order - b.order;
@@ -279,13 +665,16 @@ nav.tabs button.on { color: var(--accent); font-weight: 700; }
     return { finish, late: finish > ph.end ? Math.ceil(daysBetween(ph.end, finish) / 7) : 0 };
   }
   const currentPhase = S => (S.tasks.filter(t => !t.done).sort(byPlan)[0] || { phase: 4 }).phase;
-  window.ISEPrep = { planWeek, project, availability, weekStart, validate, EMPTY };
+  // Tasks saved before lessons existed get theirs from the seed plan, matched by id and title.
+  const SEED_LESSON = Object.fromEntries(seedTasks().filter(t => t.lesson).map(t => [t.id, t]));
+  const lessonOf = t => t && (t.lesson || (SEED_LESSON[t.id] && SEED_LESSON[t.id].title === t.title ? SEED_LESSON[t.id].lesson : null));
+  window.ISEPrep = { planWeek, project, availability, weekStart, validate, EMPTY, LESSONS, lessonQuestions, checkNum, MEAL_BEST, FOODS, mealCost, mealProtein, lessonOf, ui: () => ui };
 
   // ---------- Storage: localStorage on this phone ----------
   const LS = "iseprep-v1";
   let S = null, LOCKED = null, saveErr = false;
   let tab = "today";
-  let ui = { sheet: null, open: {}, msg: "", err: "", exportShown: false, confirm: null };
+  let ui = { sheet: null, lesson: null, open: {}, msg: "", err: "", exportShown: false, confirm: null, showOutside: false };
 
   function cacheLocal() {
     if (LOCKED !== null || !S) return false;
@@ -389,7 +778,7 @@ nav.tabs button.on { color: var(--accent); font-weight: 700; }
     for (const s of sessions) {
       const t = taskById(s.taskId);
       if (s.day !== lastDay) { h += `<h3>${fmtDay(s.day)}${s.day === today() ? " · today" : ""}</h3>`; lastDay = s.day; }
-      h += `<div class="row ${t.done ? "done" : ""}"><button type="button" class="chk ${t.done ? "on" : ""}" data-act="toggle" data-id="${t.id}" aria-label="${t.done ? "Mark not done" : "Mark done"}"></button><div class="grow"><div class="title">${esc(t.title)}</div><div class="small muted">${hm(s.mins)} ${modeTag(t.mode)}</div></div><button type="button" class="btn small ghost" data-act="log" data-id="${t.id}" data-mins="${s.mins}">Log</button></div>`;
+      h += `<div class="row ${t.done ? "done" : ""}"><button type="button" class="chk ${t.done ? "on" : ""}" data-act="toggle" data-id="${t.id}" aria-label="${t.done ? "Mark not done" : "Mark done"}"></button><div class="grow"><div class="title">${esc(t.title)}</div><div class="small muted">${hm(s.mins)} ${modeTag(t.mode)}</div></div>${lessonOf(t) ? `<button type="button" class="btn small" data-act="lesson" data-id="${t.id}">${t.done ? "Review" : "Start"}</button>` : `<button type="button" class="btn small ghost" data-act="log" data-id="${t.id}" data-mins="${s.mins}">Log</button>`}</div>`;
     }
     const done = loggedIn(S, wk);
     h += `<p class="small muted" style="margin-top:10px">Logged this week: ${hm(done)}</p></div>`;
@@ -406,7 +795,7 @@ nav.tabs button.on { color: var(--accent); font-weight: 700; }
       if (open) {
         for (const t of pt) {
           const sp = spent(S, t.id);
-          h += `<div class="row ${t.done ? "done" : ""}"><button type="button" class="chk ${t.done ? "on" : ""}" data-act="toggle" data-id="${t.id}" aria-label="${t.done ? "Mark not done" : "Mark done"}"></button><div class="grow"><div class="title">${esc(t.title)}</div><div class="small muted">${hm(t.mins)}${sp ? `, ${hm(sp)} logged` : ""} ${modeTag(t.mode)}</div></div>${t.custom ? `<button type="button" class="btn small ghost" data-act="delTask" data-id="${t.id}">Remove</button>` : ""}</div>`;
+          h += `<div class="row ${t.done ? "done" : ""}"><button type="button" class="chk ${t.done ? "on" : ""}" data-act="toggle" data-id="${t.id}" aria-label="${t.done ? "Mark not done" : "Mark done"}"></button><div class="grow"><div class="title">${esc(t.title)}</div><div class="small muted">${hm(t.mins)}${sp ? `, ${hm(sp)} logged` : ""} ${modeTag(t.mode)}</div></div>${lessonOf(t) ? `<button type="button" class="btn small ghost" data-act="lesson" data-id="${t.id}">${t.done ? "Review" : "Start"}</button>` : ""}${t.custom ? `<button type="button" class="btn small ghost" data-act="delTask" data-id="${t.id}">Remove</button>` : ""}</div>`;
         }
         h += `<form data-form="addTask" data-ph="${ph.id}"><label>Add a task to this phase</label><input name="title" placeholder="What to do" required maxlength="120"><div class="stats" style="margin-top:6px"><div><select name="mins">${[15, 30, 45, 60, 90, 120].map(m => `<option value="${m}" ${m === 60 ? "selected" : ""}>${hm(m)}</option>`).join("")}</select></div><div><select name="mode"><option value="phone">Phone</option><option value="laptop">Laptop</option></select></div></div><div class="btns"><button class="btn small">Add task</button></div></form>`;
       }
@@ -432,17 +821,101 @@ nav.tabs button.on { color: var(--accent); font-weight: 700; }
     return h;
   }
 
-  function renderLibrary() {
+  function renderLearn() {
     const label = { todo: "To do", doing: "Doing", done: "Done" };
-    let h = "";
+    let h = `<p class="small muted" style="margin:0 2px 12px">Everything for NS is inside the app: short notes, then practice with fresh numbers each time. Score 80% to finish a session.</p>`;
     for (const ph of PHASES) {
-      const rs = S.resources.filter(r => r.phase === ph.id);
-      if (!rs.length) continue;
+      const keys = [...new Set(S.tasks.filter(t => t.phase === ph.id && lessonOf(t)).sort(byPlan).map(lessonOf))];
+      if (!keys.length) continue;
       h += `<div class="card"><p class="eyebrow">Phase ${ph.id}</p><h2>${esc(ph.name)}</h2>`;
-      for (const r of rs) h += `<div class="row ${r.status === "done" ? "done" : ""}"><div class="grow"><div class="title">${r.url ? `<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.title)}</a>` : esc(r.title)}</div><div class="small muted">${esc(r.skill || "")} ${modeTag(r.mode)}</div></div><button type="button" class="btn small ghost" data-act="cycleRes" data-id="${r.id}">${label[r.status]}</button></div>`;
+      for (const k of keys) {
+        const ts = S.tasks.filter(t => lessonOf(t) === k).sort(byPlan), d = ts.filter(t => t.done).length;
+        const best = Math.max(-1, ...ts.map(t => (S.quiz[t.id] && S.quiz[t.id].best) ?? -1));
+        const next = ts.find(t => !t.done) || ts[ts.length - 1];
+        h += `<div class="row ${d === ts.length ? "done" : ""}"><div class="grow"><div class="title">${esc(LESSONS[k].title)}</div><div class="small muted">${d} of ${ts.length} session${ts.length === 1 ? "" : "s"} done${best >= 0 ? ` · best ${best}%` : ""}</div></div><button type="button" class="btn small ${d === ts.length ? "ghost" : ""}" data-act="lesson" data-id="${next.id}">${d === ts.length ? "Review" : "Start"}</button></div>`;
+      }
       h += `</div>`;
     }
-    h += `<div class="card"><form data-form="addRes"><h2>Add a resource</h2><label>Title</label><input name="title" required maxlength="120"><label>Link (optional)</label><input name="url" type="url" placeholder="https://"><div class="stats" style="margin-top:6px"><div><label>Phase</label><select name="phase">${PHASES.map(p => `<option value="${p.id}">${p.id}. ${esc(p.name)}</option>`).join("")}</select></div><div><label>Where</label><select name="mode"><option value="phone">Phone</option><option value="laptop">Laptop</option></select></div></div><div class="btns"><button class="btn small">Add resource</button></div></form></div>`;
+    const afterOrd = thisWeek() >= ordWeek(S);
+    if (afterOrd || ui.showOutside) {
+      h += `<h3 style="margin:16px 2px 8px">Outside resources${afterOrd ? "" : " (for after ORD)"}</h3>`;
+      for (const ph of PHASES) {
+        const rs = S.resources.filter(r => r.phase === ph.id);
+        if (!rs.length) continue;
+        h += `<div class="card"><p class="eyebrow">Phase ${ph.id}</p><h2>${esc(ph.name)}</h2>`;
+        for (const r of rs) h += `<div class="row ${r.status === "done" ? "done" : ""}"><div class="grow"><div class="title">${r.url ? `<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.title)}</a>` : esc(r.title)}</div><div class="small muted">${esc(r.skill || "")} ${modeTag(r.mode)}</div></div><button type="button" class="btn small ghost" data-act="cycleRes" data-id="${r.id}">${label[r.status]}</button></div>`;
+        h += `</div>`;
+      }
+      h += `<div class="card"><form data-form="addRes"><h2>Add a resource</h2><label>Title</label><input name="title" required maxlength="120"><label>Link (optional)</label><input name="url" type="url" placeholder="https://"><div class="stats" style="margin-top:6px"><div><label>Phase</label><select name="phase">${PHASES.map(p => `<option value="${p.id}">${p.id}. ${esc(p.name)}</option>`).join("")}</select></div><div><label>Where</label><select name="mode"><option value="phone">Phone</option><option value="laptop">Laptop</option></select></div></div><div class="btns"><button class="btn small">Add resource</button></div></form></div>`;
+      if (!afterOrd) h += `<div class="btns"><button type="button" class="btn small ghost" data-act="toggleOutside">Hide outside resources</button></div>`;
+    } else h += `<div class="btns"><button type="button" class="btn small ghost" data-act="toggleOutside">Show outside resources (for after ORD)</button></div>`;
+    return h;
+  }
+
+  // ---------- Lesson screen: notes, then questions one at a time, or a hands-on activity ----------
+  function openLesson(id) {
+    const t = taskById(id), key = lessonOf(t); if (!key) return;
+    const q = S.quiz[id] || { best: null, attempts: 0 };
+    const L = LESSONS[key];
+    ui.lesson = { id, key, step: "notes", i: 0, results: [], picked: null, input: "", checked: null, started: Date.now(), qs: L.activity ? [] : lessonQuestions(key, hashStr(id + ":" + q.attempts)) };
+  }
+  function lessonDone() {
+    const l = ui.lesson, t = taskById(l.id);
+    if (!t.done) {
+      setDone(t, true);
+      const mins = Math.max(5, Math.min(t.mins, Math.ceil((Date.now() - l.started) / 60000 / 5) * 5));
+      S.logs.push({ id: uid(), day: today(), mins, taskId: t.id, topic: "" });
+    }
+    ui.lesson = null; save();
+  }
+  const activityReady = key => key === "outline" ? OUTLINE.every(([k]) => (S.notes["case-" + k] || "").trim()) : key === "draft" ? words(S.notes["case-draft"]) >= 150 : key === "meal" ? !!S.mealSolved : key === "check3" ? words(S.notes["case-draft"]) >= 150 && !!S.mealSolved : false;
+  function renderActivity(L, t) {
+    let h = "";
+    if (L.activity === "outline") {
+      for (const [k, lbl] of OUTLINE) h += `<label>${esc(lbl)}</label><textarea data-note="case-${k}" style="min-height:70px;font-family:inherit;font-size:15px">${esc(S.notes["case-" + k] || "")}</textarea>`;
+    } else if (L.activity === "draft") {
+      const out = OUTLINE.map(([k, lbl]) => S.notes["case-" + k] ? `<p class="small"><b>${esc(lbl.split(":")[0])}:</b> ${esc(S.notes["case-" + k])}</p>` : "").join("");
+      if (out) h += `<div class="card">${out}</div>`;
+      h += `<label>Draft (${words(S.notes["case-draft"])} words, aim for 250 to 400)</label><textarea data-note="case-draft" style="min-height:260px;font-family:inherit;font-size:15px">${esc(S.notes["case-draft"] || "")}</textarea>`;
+    } else if (L.activity === "meal") {
+      const q = S.meal, cost = mealCost(q), pr = mealProtein(q), ok = pr >= MEAL_TARGET;
+      h += `<table class="xl"><tr><th>Food</th><th>Cost</th><th>Protein</th><th>Servings</th></tr>${FOODS.map((f, i) => `<tr><td>${esc(f.name)}</td><td>$${f.cost.toFixed(2)}</td><td>${f.protein} g</td><td><button type="button" class="btn small ghost" data-act="meal" data-i="${i}" data-d="-1" aria-label="Fewer ${esc(f.name)}">−</button> <b>${q[i]}</b> <button type="button" class="btn small ghost" data-act="meal" data-i="${i}" data-d="1" aria-label="More ${esc(f.name)}">+</button></td></tr>`).join("")}</table>`;
+      h += `<p>Protein: <b>${pr} g</b> ${ok ? "✓ meets 60 g" : `(need ${MEAL_TARGET - pr} g more)`} · Cost: <b>$${cost.toFixed(2)}</b></p>`;
+      if (S.mealSolved) h += `<div class="fb right">Solved: $${MEAL_BEST.toFixed(2)} is the cheapest way to get 60 g. This is what Solver does automatically: it searches all combinations, and on big problems it uses clever maths so it doesn't have to.</div>`;
+      else if (ok && cost <= MEAL_BEST + 1e-9) h += `<div class="fb right">That's the cheapest possible: $${cost.toFixed(2)}.</div>`;
+      else if (ok) h += `<div class="fb wrong">Meets the target, but there's a cheaper combination. Hint: compare cost per gram of protein.</div>`;
+    } else if (L.activity === "check3") {
+      const w = words(S.notes["case-draft"]);
+      h += `<div class="row"><div class="grow">Case study draft: ${w} words</div><span class="status ${w >= 150 ? "ok" : "late"}">${w >= 150 ? "Done" : "Needs 150+"}</span></div><div class="row"><div class="grow">Cheapest protein plan found</div><span class="status ${S.mealSolved ? "ok" : "late"}">${S.mealSolved ? "Done" : "Not yet"}</span></div>`;
+    }
+    const ready = activityReady(L.activity);
+    h += `<div class="btns">${t.done ? "" : `<button type="button" class="btn" data-act="lessonFinish" ${ready ? "" : "disabled style=\"opacity:.5\""}>Mark this session done</button>`}<button type="button" class="btn ghost" data-act="lessonClose">${t.done || !ready ? "Close (saved)" : "Close"}</button></div>`;
+    if (!ready && !t.done) h += `<p class="small muted">${L.activity === "outline" ? "Fill in all five headings to finish." : L.activity === "draft" ? "Write at least 150 words to finish." : L.activity === "meal" ? "Find the cheapest combination to finish." : "Finish the case study draft and the protein puzzle first."}</p>`;
+    return h;
+  }
+  function renderLessonBody() {
+    const l = ui.lesson, L = LESSONS[l.key], t = taskById(l.id);
+    let h = `<p class="eyebrow">${esc(t.title)}</p><h2>${esc(L.title)}</h2>`;
+    if (L.activity) return h + `<div class="notes">${L.notes}</div>` + renderActivity(L, t);
+    if (l.step === "notes") return h + `<div class="notes">${L.notes}</div><div class="btns"><button type="button" class="btn" data-act="lessonGo">Practice (${l.qs.length} questions)</button><button type="button" class="btn ghost" data-act="lessonClose">Close</button></div>`;
+    if (l.step === "end") {
+      const right = l.results.filter(Boolean).length, pct = Math.round(right / l.qs.length * 100), pass = pct >= 80;
+      h += `<div class="fb ${pass ? "right" : "wrong"}"><b>${right} of ${l.qs.length} (${pct}%).</b> ${pass ? "Passed." : "Not quite 80% yet. Read the notes again and retry: you'll get new numbers."}</div>`;
+      h += `<div class="btns">${pass && !t.done ? `<button type="button" class="btn" data-act="lessonFinish">Mark this session done</button>` : ""}<button type="button" class="btn ${pass && !t.done ? "ghost" : ""}" data-act="lessonRetry">Try new questions</button><button type="button" class="btn ghost" data-act="lessonClose">Close</button></div>`;
+      return h;
+    }
+    const q = l.qs[l.i];
+    h += `<p class="qcount">Question ${l.i + 1} of ${l.qs.length} · <a href="#" data-act="lessonNotes">${l.showNotes ? "hide notes" : "notes"}</a> · <a href="#" data-act="lessonClose">close</a></p>${l.showNotes ? `<div class="card notes">${L.notes}</div>` : ""}<p style="font-size:17px">${q.q}</p>`;
+    if (q.type === "mc") {
+      h += q.choices.map((c, k) => `<button type="button" class="choice ${l.checked !== null ? (k === q.ans ? "right" : k === l.picked ? "wrong" : "") : ""}" data-act="pick" data-k="${k}" ${l.checked !== null ? "disabled" : ""}>${esc(c)}</button>`).join("");
+    } else {
+      h += `<input id="ans" inputmode="decimal" autocomplete="off" placeholder="Your answer" value="${esc(l.input)}" ${l.checked !== null ? "disabled" : ""}>`;
+      if (l.checked === null) h += `<div class="btns"><button type="button" class="btn" data-act="checkNum">Check</button><button type="button" class="btn ghost" data-act="skipQ">I don't know</button></div>`;
+    }
+    if (l.bad) h += `<p class="err">Type a number, like 12, -3, 0.25 or 1/6.</p>`;
+    if (l.checked !== null) {
+      h += `<div class="fb ${l.checked ? "right" : "wrong"}"><b>${l.checked ? "Right." : `Not quite. The answer is ${q.type === "mc" ? esc(q.choices[q.ans]) : showAns(q.ans)}.`}</b> ${q.explain}</div><div class="btns"><button type="button" class="btn" data-act="nextQ">${l.i + 1 < l.qs.length ? "Next question" : "See score"}</button></div>`;
+    }
     return h;
   }
 
@@ -473,6 +946,7 @@ nav.tabs button.on { color: var(--accent); font-weight: 700; }
 
   function renderSheet() {
     const el = document.getElementById("sheet"), s = ui.sheet;
+    if (ui.lesson) { el.innerHTML = `<div class="back"></div><div class="panel" role="dialog" aria-modal="true" style="max-height:96vh;min-height:70vh"><div class="in">${renderLessonBody()}</div></div>`; return; }
     if (!s) { el.innerHTML = ""; return; }
     let h = "";
     if (s.kind === "checkin") {
@@ -487,11 +961,11 @@ nav.tabs button.on { color: var(--accent); font-weight: 700; }
 
   function render() {
     if (LOCKED !== null) { renderLocked(); return; }
-    const titles = { today: ["Week of " + fmtDay(thisWeek()), "This week"], plan: ["Dec 2026 to Jul 2028", "Your plan"], log: ["Study log", "Progress"], library: ["Courses, books, videos", "Library"], more: ["Settings and data", "More"] };
+    const titles = { today: ["Week of " + fmtDay(thisWeek()), "This week"], plan: ["Dec 2026 to Jul 2028", "Your plan"], log: ["Study log", "Progress"], learn: ["Lessons and practice", "Learn"], more: ["Settings and data", "More"] };
     document.getElementById("eyebrow").textContent = titles[tab][0];
     document.getElementById("heading").textContent = titles[tab][1];
     for (const b of document.querySelectorAll("nav.tabs button")) b.classList.toggle("on", b.dataset.tab === tab);
-    view.innerHTML = { today: renderToday, plan: renderPlan, log: renderLog, library: renderLibrary, more: renderMore }[tab]();
+    view.innerHTML = { today: renderToday, plan: renderPlan, log: renderLog, learn: renderLearn, more: renderMore }[tab]();
     renderSheet();
   }
 
@@ -533,6 +1007,18 @@ nav.tabs button.on { color: var(--accent); font-weight: 700; }
       case "resetYes": writeBackup("before-reset", JSON.stringify(S)); S = EMPTY(); ui.confirm = null; save(); ui.msg = "Started over with the original plan."; break;
       case "lockedFresh": writeBackup("unreadable", LOCKED); LOCKED = null; S = EMPTY(); save(); tab = "today"; break;
       case "retrySave": save(); break;
+      case "lesson": ui.sheet = null; openLesson(id); break;
+      case "lessonGo": ui.lesson.step = "q"; break;
+      case "lessonNotes": ui.lesson.showNotes = !ui.lesson.showNotes; break;
+      case "lessonClose": ui.lesson = null; break;
+      case "pick": { const l = ui.lesson, q = l.qs[l.i]; if (l.checked !== null) break; l.picked = Number(a.dataset.k); l.checked = l.picked === q.ans; l.results.push(l.checked); break; }
+      case "checkNum": { const l = ui.lesson, inp = document.getElementById("ans"); l.input = inp ? inp.value : ""; const r = checkNum(l.input, l.qs[l.i].ans); if (r === null) { l.bad = true; break; } l.bad = false; l.checked = r; l.results.push(r); break; }
+      case "skipQ": { const l = ui.lesson; l.bad = false; l.checked = false; l.results.push(false); break; }
+      case "nextQ": { const l = ui.lesson; l.i++; l.picked = null; l.input = ""; l.checked = null; l.showNotes = false; if (l.i >= l.qs.length) { l.step = "end"; const pct = Math.round(l.results.filter(Boolean).length / l.qs.length * 100), q = S.quiz[l.id] || { best: null, attempts: 0 }; S.quiz[l.id] = { best: Math.max(q.best ?? 0, pct), attempts: q.attempts + 1 }; save(); } break; }
+      case "lessonRetry": { const id2 = ui.lesson.id; openLesson(id2); ui.lesson.step = "q"; break; }
+      case "lessonFinish": { const L = LESSONS[ui.lesson.key]; if (L.activity && !activityReady(L.activity)) break; lessonDone(); break; }
+      case "meal": { const i = Number(a.dataset.i); S.meal[i] = Math.max(0, Math.min(5, S.meal[i] + Number(a.dataset.d))); if (mealProtein(S.meal) >= MEAL_TARGET && mealCost(S.meal) <= MEAL_BEST + 1e-9) S.mealSolved = true; save(); break; }
+      case "toggleOutside": ui.showOutside = !ui.showOutside; break;
     }
     render();
   });
@@ -560,6 +1046,16 @@ nav.tabs button.on { color: var(--accent); font-weight: 700; }
     }
     save(); render();
   });
+
+  // Writing activities save as you type. Enter in an answer box checks it.
+  document.addEventListener("input", e => {
+    const n = e.target.dataset && e.target.dataset.note; if (!n || LOCKED !== null) return;
+    S.notes[n] = e.target.value; save();
+    if (n === "case-draft") { const lbl = e.target.previousElementSibling; if (lbl) lbl.textContent = `Draft (${words(e.target.value)} words, aim for 250 to 400)`; }
+    const fin = document.querySelector('[data-act="lessonFinish"]'); const L = ui.lesson && LESSONS[ui.lesson.key];
+    if (fin && L && L.activity) { const r = activityReady(L.activity); fin.disabled = !r; fin.style.opacity = r ? "" : ".5"; }
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Enter" && e.target.id === "ans") { e.preventDefault(); const b = document.querySelector('[data-act="checkNum"]'); if (b) b.click(); } });
 
   // ---------- Start ----------
   S = readLocal();

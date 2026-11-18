@@ -53,7 +53,7 @@ const inPage = (p, fn, arg) => p.evaluate(([src, a]) => { const f = new Function
         out.next = P.planWeek(S, '2027-01-11').sessions[0].taskId;
         // phone-only week skips laptop tasks
         const S2 = P.EMPTY();
-        for (const t of S2.tasks) if (t.phase < 3) { t.done = true; t.doneOn = '2026-12-01'; }
+        for (const t of S2.tasks) if (t.phase < 4) { t.done = true; t.doneOn = '2026-12-01'; }
         S2.weeks[W] = { mins: 180, days: [5], mode: 'phone' };
         out.phone = P.planWeek(S2, W).sessions.map(s => S2.tasks.find(t => t.id === s.taskId).mode);
         S2.weeks[W].mode = 'both';
@@ -107,7 +107,8 @@ const inPage = (p, fn, arg) => p.evaluate(([src, a]) => { const f = new Function
       await p.click('#view .row >> nth=0 >> .chk');
       ok(JSON.parse(await stored(p)).tasks[0].done === true, 'ticking a session marks its task done');
       ok((await p.locator('#view .row.done').count()) === 1, 'the ticked session stays visible, struck through');
-      await p.click('#view .row >> nth=1 >> text=Log');
+      await p.click('text=Log other study time');
+      await p.selectOption('#sheet select[name="taskId"]', 's2');
       await p.fill('#sheet input[name="mins"]', '40');
       await p.click('#sheet button:has-text("Save")');
       const s2 = JSON.parse(await stored(p));
@@ -119,8 +120,10 @@ const inPage = (p, fn, arg) => p.evaluate(([src, a]) => { const f = new Function
       await p.fill('form[data-form="addTask"] input[name="title"]', 'Past-year poly maths paper');
       await p.click('text=Add task');
       ok(JSON.parse(await stored(p)).tasks.some(t => t.title === 'Past-year poly maths paper' && t.phase === 1), 'can add a task to a phase');
-      await tab(p, 'library');
-      await p.click('#view .row >> nth=0 >> button');
+      await tab(p, 'learn');
+      ok(!(await p.isVisible('text=Khan Academy: Precalculus')), 'outside resources are hidden before ORD');
+      await p.click('text=Show outside resources');
+      await p.click('.row:has-text("Khan Academy: Precalculus") >> button');
       ok(JSON.parse(await stored(p)).resources[0].status === 'doing', 'resource status cycles');
       await tab(p, 'more');
       await p.fill('form[data-form="idea"] input', 'Stores queue on Monday mornings');
